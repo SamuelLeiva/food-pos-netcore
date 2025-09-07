@@ -6,9 +6,8 @@ using System.Threading.Tasks;
 
 namespace Core.Entities
 {
-    public class Category : BaseEntity
+    public class BaseEntity
     {
-        public string Name { get; set; }
-        public ICollection<Product> Products { get; set; }
+        public int Id { get; set; }
     }
 }
