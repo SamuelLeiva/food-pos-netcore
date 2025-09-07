@@ -1,5 +1,6 @@
 ﻿using Core.Interfaces;
 using Infrastructure.Repositories;
+using Infrastructure.UnitOfWork;
 
 namespace API.Extensions
 {
@@ -17,9 +18,10 @@ namespace API.Extensions
 
         public static void AddApplicationServices(this IServiceCollection services)
         {
-            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-            services.AddScoped<IProductRepository, ProductRepository>();
-            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            //services.AddScoped<IProductRepository, ProductRepository>();
+            //services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
         }
 
     }
