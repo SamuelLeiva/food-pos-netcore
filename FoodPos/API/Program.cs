@@ -1,9 +1,11 @@
+using API.Extensions;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.ConfigureCors();
 
 builder.Services.AddControllers();
 
@@ -23,6 +25,20 @@ if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
+
+// En el futuro configurar el seed (consultar curso)
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+//    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+//    try
+//    {
+//        var context = services.GetRequiredService<PosContext>();
+//        await context.Database.MigrateAsync();
+//    }
+//}
+
+app.UseCors("CorsPolicy");
 
 app.UseHttpsRedirection();
 
