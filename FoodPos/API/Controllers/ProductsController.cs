@@ -25,5 +25,15 @@ namespace API.Controllers
             return Ok(productos);
         }
 
+        [HttpGet("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<IActionResult> Get(int id)
+        {
+            var producto = await _context.Products.FindAsync(id);
+            return Ok(producto);
+        }
+
+
     }
 }
