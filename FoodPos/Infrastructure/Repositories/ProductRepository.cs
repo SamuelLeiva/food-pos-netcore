@@ -10,13 +10,13 @@ using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
 {
-    public class ProductoRepository : GenericRepository<Product>, IProductRepository
+    public class ProductRepository : GenericRepository<Product>, IProductRepository
     {
-        public ProductoRepository(PosContext context) : base(context)
+        public ProductRepository(PosContext context) : base(context)
         {
         }
 
-        public async Task<IEnumerable<Product>> GetProductosMasCaros(int cantidad) =>
+        public async Task<IEnumerable<Product>> GetMostExpensiveProducts(int cantidad) =>
                         await _context.Products
                             .OrderByDescending(p => p.Price)
                             .Take(cantidad)

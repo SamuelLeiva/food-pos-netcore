@@ -9,7 +9,7 @@ namespace Core.Interfaces
 {
     public interface IProductRepository : IGenericRepository<Product>
     {
-        Task<IEnumerable<Product>> GetProductosMasCaros(int cantidad);
+        Task<IEnumerable<Product>> GetMostExpensiveProducts(int cantidad);
     }
 
 }
