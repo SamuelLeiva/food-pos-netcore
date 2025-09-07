@@ -27,16 +27,22 @@ if (app.Environment.IsDevelopment())
 }
 
 // En el futuro configurar el seed (consultar curso)
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
-//    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
-//    try
-//    {
-//        var context = services.GetRequiredService<PosContext>();
-//        await context.Database.MigrateAsync();
-//    }
-//}
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var loggerFactory = services.GetRequiredService<ILoggerFactory>();
+    try
+    {
+        var context = services.GetRequiredService<PosContext>();
+        await context.Database.MigrateAsync();
+        await PosContextSeed.SeedAsync(context, loggerFactory);
+    }
+    catch (Exception ex)
+    {
+        var logger = loggerFactory.CreateLogger<Program>();
+        logger.LogError(ex, "An error ocurred during the migration.");
+    }
+}
 
 app.UseCors("CorsPolicy");
 
