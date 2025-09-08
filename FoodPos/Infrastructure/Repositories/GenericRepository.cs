@@ -41,7 +41,7 @@ namespace Infrastructure.Repositories
         }
 
         // se añade virtual´para colecciones sencillas sin entidades anidadas (en el caso de Product, sobrescribiremos)
-        public virtual async Task<(int totalRegisters, IEnumerable<T> registers)> GetAllAsync(int pageIndex, int pageSize)
+        public virtual async Task<(int totalRegisters, IEnumerable<T> registers)> GetAllAsync(int pageIndex, int pageSize, string search)
         {
             var totalRegisters = await _context.Set<T>()
                                 .CountAsync();

@@ -26,9 +26,9 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<Pager<ProductListDto>>> Get([FromQuery] Params productParams)
         {
-            var result = await _unitOfWork.Products.GetAllAsync(productParams.PageIndex, productParams.PageSize);
+            var result = await _unitOfWork.Products.GetAllAsync(productParams.PageIndex, productParams.PageSize, productParams.Search);
             var productsListDto = _mapper.Map<List<ProductListDto>>(result.registers);
-            return new Pager<ProductListDto>(productsListDto, result.totalRegisters, productParams.PageIndex, productParams.PageSize);
+            return new Pager<ProductListDto>(productsListDto, result.totalRegisters, productParams.PageIndex, productParams.PageSize, productParams.Search);
         }
 
         [HttpGet("{id}")]
