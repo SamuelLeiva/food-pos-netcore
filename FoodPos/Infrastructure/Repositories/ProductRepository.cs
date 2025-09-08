@@ -16,10 +16,10 @@ namespace Infrastructure.Repositories
         {
         }
 
-        public async Task<IEnumerable<Product>> GetMostExpensiveProducts(int cantidad) =>
+        public async Task<IEnumerable<Product>> GetMostExpensiveProducts(int quantity) =>
                         await _context.Products
                             .OrderByDescending(p => p.Price)
-                            .Take(cantidad)
+                            .Take(quantity)
                             .ToListAsync();
 
         // Sobrescribimos el metodo para que incluya a category y no aparezca null en la respuesta
@@ -28,6 +28,13 @@ namespace Infrastructure.Repositories
             return await _context.Products
                             .Include(p => p.Category)
                             .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
+        public override async Task<IEnumerable<Product>> GetAllAsync()
+        {
+            return await _context.Products
+                .Include(p => p.Category)
+                .ToListAsync();
         }
     }
 

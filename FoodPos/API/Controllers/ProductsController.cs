@@ -23,10 +23,10 @@ namespace API.Controllers
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<IEnumerable<Product>>> Get()
+        public async Task<ActionResult<IEnumerable<ProductListDto>>> Get()
         {
-            var productos = await _unitOfWork.Products.GetAllAsync();
-            return Ok(productos);
+            var products = await _unitOfWork.Products.GetAllAsync();
+            return _mapper.Map<List<ProductListDto>>(products);
         }
 
         [HttpGet("{id}")]
