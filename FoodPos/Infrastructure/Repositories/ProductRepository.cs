@@ -21,6 +21,14 @@ namespace Infrastructure.Repositories
                             .OrderByDescending(p => p.Price)
                             .Take(cantidad)
                             .ToListAsync();
+
+        // Sobrescribimos el metodo para que incluya a category y no aparezca null en la respuesta
+        public override async Task<Product> GetByIdAsync(int id)
+        {
+            return await _context.Products
+                            .Include(p => p.Category)
+                            .FirstOrDefaultAsync(p => p.Id == id);
+        }
     }
 
 }
