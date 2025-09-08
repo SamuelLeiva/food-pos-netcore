@@ -1,5 +1,6 @@
 using API;
 using API.Extensions;
+using AspNetCoreRateLimit;
 using AutoMapper;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 //AutoMapper
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
+
+builder.Services.ConfigureRateLimiting();
 
 // Add services to the container.
 builder.Services.ConfigureCors();
@@ -26,6 +29,8 @@ builder.Services.AddDbContext<PosContext>(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.UseIpRateLimiting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
