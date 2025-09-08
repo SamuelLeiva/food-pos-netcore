@@ -10,7 +10,7 @@ namespace Core.Interfaces
     {
         IProductRepository Products { get; }
         ICategoryRepository Categories { get; }
-        int Save();
+        Task<int> SaveAsync();
     }
 
 }

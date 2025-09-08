@@ -45,47 +45,49 @@ namespace API.Controllers
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Product>> Post(Product product)
+        public async Task<ActionResult<Product>> Post(ProductAddUpdateDto productDto)
         {
+            var product = _mapper.Map<Product>(productDto);
+
             _unitOfWork.Products.Add(product);
-            _unitOfWork.Save();
+            await _unitOfWork.SaveAsync();
             if (product == null)
             {
                 return BadRequest();
             }
-
-            return CreatedAtAction(nameof(Post), new {id = product.Id}, product);
+            productDto.Id = product.Id;
+            return CreatedAtAction(nameof(Post), new {id = productDto.Id}, productDto);
         }
 
-        [HttpPut("{id}")]
-        [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        public async Task<ActionResult<Product>> Put(int id, [FromBody] Product product)
-        {
-            if (product == null)
-                return NotFound();
+        //[HttpPut("{id}")]
+        //[ProducesResponseType(StatusCodes.Status200OK)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //public async Task<ActionResult<Product>> Put(int id, [FromBody] Product product)
+        //{
+        //    if (product == null)
+        //        return NotFound();
 
-            _unitOfWork.Products.Update(product);
-            _unitOfWork.Save();
+        //    _unitOfWork.Products.Update(product);
+        //    _unitOfWork.Save();
 
-            return product;
-        }
+        //    return product;
+        //}
 
-        [HttpDelete("{id}")]
-        [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var product = await _unitOfWork.Products.GetByIdAsync(id);
-            if (product == null)
-                return NotFound();
+        //[HttpDelete("{id}")]
+        //[ProducesResponseType(StatusCodes.Status204NoContent)]
+        //[ProducesResponseType(StatusCodes.Status404NotFound)]
+        //public async Task<IActionResult> Delete(int id)
+        //{
+        //    var product = await _unitOfWork.Products.GetByIdAsync(id);
+        //    if (product == null)
+        //        return NotFound();
 
-            _unitOfWork.Products.Remove(product);
-            _unitOfWork.Save();
+        //    _unitOfWork.Products.Remove(product);
+        //    _unitOfWork.Save();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
     }
 }
