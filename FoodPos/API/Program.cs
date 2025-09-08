@@ -16,6 +16,7 @@ builder.Services.ConfigureRateLimiting();
 // Add services to the container.
 builder.Services.ConfigureCors();
 builder.Services.AddApplicationServices();
+builder.Services.ConfigureApiVersioning();
 
 builder.Services.AddControllers();
 
