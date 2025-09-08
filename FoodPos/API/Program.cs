@@ -18,7 +18,12 @@ builder.Services.ConfigureCors();
 builder.Services.AddApplicationServices();
 builder.Services.ConfigureApiVersioning();
 
-builder.Services.AddControllers();
+//permitimos soporte del formato xml ("Accept": "application/xml")
+builder.Services.AddControllers(options => {
+    options.RespectBrowserAcceptHeader = true;
+    // envía un error en el caso en el que el cliente solicite un formato no permitido
+    options.ReturnHttpNotAcceptable = true; 
+    }).AddXmlSerializerFormatters();
 
 builder.Services.AddDbContext<PosContext>(options =>
 {
