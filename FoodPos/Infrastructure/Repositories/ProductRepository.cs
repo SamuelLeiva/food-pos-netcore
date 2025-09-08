@@ -36,6 +36,21 @@ namespace Infrastructure.Repositories
                 .Include(p => p.Category)
                 .ToListAsync();
         }
+
+        public override async Task<(int totalRegisters, IEnumerable<Product> registers)> GetAllAsync(int pageIndex, int pageSize)
+        {
+            var totalRegisters = await _context.Products
+                                        .CountAsync();
+
+            var registers = await _context.Products
+                                    .Include(p => p.Category)
+                                    .Skip((pageIndex - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .ToListAsync();
+
+            return (totalRegisters, registers);
+        }
+
     }
 
 }
