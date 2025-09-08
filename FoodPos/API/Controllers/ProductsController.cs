@@ -59,35 +59,37 @@ namespace API.Controllers
             return CreatedAtAction(nameof(Post), new {id = productDto.Id}, productDto);
         }
 
-        //[HttpPut("{id}")]
-        //[ProducesResponseType(StatusCodes.Status200OK)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //[ProducesResponseType(StatusCodes.Status400BadRequest)]
-        //public async Task<ActionResult<Product>> Put(int id, [FromBody] Product product)
-        //{
-        //    if (product == null)
-        //        return NotFound();
+        [HttpPut("{id}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<ProductAddUpdateDto>> Put(int id, [FromBody] ProductAddUpdateDto productDto)
+        {
+            if (productDto == null)
+                return NotFound();
 
-        //    _unitOfWork.Products.Update(product);
-        //    _unitOfWork.Save();
+            var product = _mapper.Map<Product>(productDto);
 
-        //    return product;
-        //}
+            _unitOfWork.Products.Update(product);
+            await _unitOfWork.SaveAsync();
 
-        //[HttpDelete("{id}")]
-        //[ProducesResponseType(StatusCodes.Status204NoContent)]
-        //[ProducesResponseType(StatusCodes.Status404NotFound)]
-        //public async Task<IActionResult> Delete(int id)
-        //{
-        //    var product = await _unitOfWork.Products.GetByIdAsync(id);
-        //    if (product == null)
-        //        return NotFound();
+            return productDto;
+        }
 
-        //    _unitOfWork.Products.Remove(product);
-        //    _unitOfWork.Save();
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            if (product == null)
+                return NotFound();
 
-        //    return NoContent();
-        //}
+            _unitOfWork.Products.Remove(product);
+            await _unitOfWork.SaveAsync();
+
+            return NoContent();
+        }
 
     }
 }
