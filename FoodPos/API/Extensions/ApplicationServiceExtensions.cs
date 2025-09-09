@@ -1,8 +1,11 @@
-﻿using Asp.Versioning;
+﻿using API.Services;
+using Asp.Versioning;
 using AspNetCoreRateLimit;
+using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
+using Microsoft.AspNetCore.Identity;
 
 namespace API.Extensions
 {
@@ -24,6 +27,8 @@ namespace API.Extensions
             //services.AddScoped<IProductRepository, ProductRepository>();
             //services.AddScoped<ICategoryRepository, CategoryRepository>();
             services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
         }
 
         public static void ConfigureRateLimiting(this IServiceCollection services) 
