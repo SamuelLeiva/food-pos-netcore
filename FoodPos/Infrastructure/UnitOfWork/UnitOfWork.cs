@@ -14,6 +14,8 @@ namespace Infrastructure.UnitOfWork
         private readonly PosContext _context;
         private IProductRepository _products;
         private ICategoryRepository _categories;
+        private IUserRepository _users;
+        private IRoleRepository _roles;
 
         public UnitOfWork(PosContext context)
         {
@@ -41,6 +43,30 @@ namespace Infrastructure.UnitOfWork
                     _products = new ProductRepository(_context);
                 }
                 return _products;
+            }
+        }
+
+        public IUserRepository Users
+        {
+            get
+            {
+                if (_users == null)
+                {
+                    _users = new UserRepository(_context);
+                }
+                return _users;
+            }
+        }
+
+        public IRoleRepository Roles
+        {
+            get
+            {
+                if (_roles == null)
+                {
+                    _roles = new RoleRepository(_context);
+                }
+                return _roles;
             }
         }
 
