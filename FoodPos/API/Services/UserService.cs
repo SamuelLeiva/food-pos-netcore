@@ -96,7 +96,7 @@ public class UserService : IUserService
             return userDataDto;
         }
         userDataDto.IsAuth = false;
-        userDataDto.Message = $"Wrong credential of user {user.UserName}.";
+        userDataDto.Message = $"Wrong credentials of user {user.UserName}.";
         return userDataDto;
     }
 
@@ -126,5 +126,48 @@ public class UserService : IUserService
             signingCredentials: signingCredentials);
         return jwtSecurityToken;
     }
+
+    public async Task<string> AddRoleAsync(AddRoleDto model)
+    {
+
+        var user = await _unitOfWork.Users
+                    .GetByUserNameAsync(model.UserName);
+
+        if (user == null)
+        {
+            return $"There is no user with account {model.UserName}.";
+        }
+
+
+        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
+
+        if (result == PasswordVerificationResult.Success)
+        {
+
+
+            var rolExists = _unitOfWork.Roles
+                                        .Find(u => u.Name.ToLower() == model.Role.ToLower())
+                                        .FirstOrDefault();
+
+            if (rolExists != null)
+            {
+                var userHasRole = user.Roles
+                                            .Any(u => u.Id == rolExists.Id);
+
+                if (userHasRole == false)
+                {
+                    user.Roles.Add(rolExists);
+                    _unitOfWork.Users.Update(user);
+                    await _unitOfWork.SaveAsync();
+                }
+
+                return $"{model.Role} role added to the account {model.UserName} successfully.";
+            }
+
+            return $"{model.Role} role not found.";
+        }
+        return $"Wrong credentials of user {user.UserName}.";
+    }
+
 }
 
