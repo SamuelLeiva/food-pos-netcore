@@ -11,37 +11,42 @@ public class UserConfiguration
         public void Configure(EntityTypeBuilder<User> builder)
         {
             builder.ToTable("User");
-            builder.Property(p => p.Id)
+            builder.Property(u => u.Id)
                     .IsRequired();
-            builder.Property(p => p.Names)
+            builder.Property(u => u.Names)
                     .IsRequired()
                     .HasMaxLength(200);
-            builder.Property(p => p.FirstSurname)
+            builder.Property(u => u.FirstSurname)
                     .IsRequired()
                     .HasMaxLength(200);
-            builder.Property(p => p.LastSurname)
+            builder.Property(u => u.LastSurname)
                     .IsRequired()
                     .HasMaxLength(200);
-            builder.Property(p => p.Email)
+            builder.Property(u => u.Email)
                     .IsRequired()
                     .HasMaxLength(200);
 
             builder
-            .HasMany(p => p.Roles)
-            .WithMany(p => p.Users)
+            .HasMany(u => u.Roles)
+            .WithMany(u => u.Users)
             .UsingEntity<UserRoles>(
-                j => j
-                    .HasOne(pt => pt.Role)
-                    .WithMany(t => t.UserRoles)
-                    .HasForeignKey(pt => pt.RoleId),
-                j => j
-                    .HasOne(pt => pt.User)
-                    .WithMany(p => p.UserRoles)
-                    .HasForeignKey(pt => pt.UserId),
-                j =>
+                ur => ur
+                    .HasOne(ur => ur.Role)
+                    .WithMany(r => r.UserRoles)
+                    .HasForeignKey(ur => ur.RoleId),
+                ur => ur
+                    .HasOne(ur => ur.User)
+                    .WithMany(u => u.UserRoles)
+                    .HasForeignKey(ur => ur.UserId),
+                ur =>
                 {
-                    j.HasKey(t => new { t.UserId, t.RoleId });
+                    ur.HasKey(t => new { t.UserId, t.RoleId });
                 });
+
+            builder
+                .HasMany(u => u.RefreshTokens)
+                .WithOne(rt => rt.User)
+                .HasForeignKey(rt => rt.UserId);
 
         }
     }
