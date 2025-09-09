@@ -1,8 +1,13 @@
-﻿using API.Helpers;
+﻿using API.Dtos;
+using API.Helpers;
 using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace API.Services;
 
@@ -18,6 +23,108 @@ public class UserService : IUserService
         _jwt = jwt.Value;
         _unitOfWork = unitOfWork;
         _passwordHasher = passwordHasher;
+    }
+
+    public async Task<string> RegisterAsync(RegisterDto registerDto)
+    {
+        var usuario = new User
+        {
+            Names = registerDto.Names,
+            FirstSurname = registerDto.FirstSurname,
+            LastSurname = registerDto.LastSurname,
+            Email = registerDto.Email,
+            UserName = registerDto.UserName
+        };
+
+        // encriptación de contraseña
+        usuario.Password = _passwordHasher.HashPassword(usuario, registerDto.Password);
+
+        var userExists = _unitOfWork.Users
+                                    .Find(u => u.UserName.ToLower() == registerDto.UserName.ToLower())
+                                    .FirstOrDefault();
+
+        if (userExists == null)
+        {
+            var defaultRole = _unitOfWork.Roles
+                                    .Find(u => u.Name == Authorization.default_role.ToString())
+                                    .First();
+            try
+            {
+                usuario.Roles.Add(defaultRole);
+                _unitOfWork.Users.Add(usuario);
+                await _unitOfWork.SaveAsync();
+
+                return $"The user {registerDto.UserName} has been registered successfully.";
+            }
+            catch (Exception ex)
+            {
+                var message = ex.Message;
+                return $"Error: {message}";
+            }
+        }
+        else
+        {
+            return $"The user {registerDto.UserName} is already registered.";
+        }
+    }
+
+    public async Task<UserDataDto> GetTokenAsync(LoginDto model)
+    {
+        UserDataDto userDataDto = new UserDataDto();
+        var user = await _unitOfWork.Users
+                    .GetByUserNameAsync(model.UserName);
+
+        if (user == null)
+        {
+            userDataDto.IsAuth = false;
+            userDataDto.Message = $"There is no user with the username {model.UserName}.";
+            return userDataDto;
+        }
+
+        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
+
+        if (result == PasswordVerificationResult.Success)
+        {
+            userDataDto.IsAuth = true;
+            JwtSecurityToken jwtSecurityToken = CreateJwtToken(user);
+            userDataDto.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+            userDataDto.Email = user.Email;
+            userDataDto.UserName = user.UserName;
+            userDataDto.Roles = user.Roles
+                                            .Select(u => u.Name)
+                                            .ToList();
+            return userDataDto;
+        }
+        userDataDto.IsAuth = false;
+        userDataDto.Message = $"Wrong credential of user {user.UserName}.";
+        return userDataDto;
+    }
+
+    private JwtSecurityToken CreateJwtToken(User user)
+    {
+        var roles = user.Roles;
+        var roleClaims = new List<Claim>();
+        foreach (var role in roles)
+        {
+            roleClaims.Add(new Claim("roles", role.Name));
+        }
+        var claims = new[]
+        {
+                                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                                new Claim("uid", user.Id.ToString())
+                        }
+        .Union(roleClaims);
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+        var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
+        var jwtSecurityToken = new JwtSecurityToken(
+            issuer: _jwt.Issuer,
+            audience: _jwt.Audience,
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(_jwt.DurationInMinutes),
+            signingCredentials: signingCredentials);
+        return jwtSecurityToken;
     }
 }
 
