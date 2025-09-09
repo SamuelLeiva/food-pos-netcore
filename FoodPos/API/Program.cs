@@ -17,6 +17,7 @@ builder.Services.ConfigureRateLimiting();
 builder.Services.ConfigureCors();
 builder.Services.AddApplicationServices();
 builder.Services.ConfigureApiVersioning();
+builder.Services.AddJwt(builder.Configuration);
 
 //permitimos soporte del formato xml ("Accept": "application/xml")
 builder.Services.AddControllers(options => {

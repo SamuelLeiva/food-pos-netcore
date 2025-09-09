@@ -1,11 +1,15 @@
-﻿using API.Services;
+﻿using API.Helpers;
+using API.Services;
 using Asp.Versioning;
 using AspNetCoreRateLimit;
 using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace API.Extensions
 {
@@ -69,6 +73,36 @@ namespace API.Extensions
                 options.SubstituteApiVersionInUrl = true;
             });
         }
+
+        public static void AddJwt(this IServiceCollection services, IConfiguration configuration)
+        {
+            //Configuration from AppSettings
+            services.Configure<JWT>(configuration.GetSection("JWT"));
+
+            //Adding Athentication - JWT
+            services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+                .AddJwtBearer(o =>
+                {
+                    o.RequireHttpsMetadata = false; //cuando esté en prod, este valor se cambiará a true
+                    o.SaveToken = false;
+                    o.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        ValidateIssuer = true,
+                        ValidateAudience = true,
+                        ValidateLifetime = true,
+                        ClockSkew = TimeSpan.Zero,
+                        ValidIssuer = configuration["JWT:Issuer"],
+                        ValidAudience = configuration["JWT:Audience"],
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["JWT:Key"]))
+                    };
+                });
+        }
+
 
     }
 }
