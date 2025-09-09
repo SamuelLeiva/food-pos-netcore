@@ -15,6 +15,7 @@ public class UserRepository : GenericRepository<User>, IUserRepository
     {
         return await _context.Users
             .Include(u => u.Roles)
+            .Include(u => u.RefreshTokens)
             .FirstOrDefaultAsync(u => u.UserName.ToLower() == userName.ToLower());
     }
 }

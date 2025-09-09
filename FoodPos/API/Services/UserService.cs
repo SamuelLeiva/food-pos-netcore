@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text;
 
 namespace API.Services;
@@ -93,12 +94,46 @@ public class UserService : IUserService
             userDataDto.Roles = user.Roles
                                             .Select(u => u.Name)
                                             .ToList();
+
+            if (user.RefreshTokens.Any(a => a.IsActive))
+            {
+                var activeRefreshToken = user.RefreshTokens.Where(a => a.IsActive == true).FirstOrDefault();
+                userDataDto.RefreshToken = activeRefreshToken.Token;
+                userDataDto.RefreshTokenExpiration = activeRefreshToken.Expires;
+            }
+            else
+            {
+                var refreshToken = CreateRefreshToken();
+                userDataDto.RefreshToken = refreshToken.Token;
+                userDataDto.RefreshTokenExpiration = refreshToken.Expires;
+                user.RefreshTokens.Add(refreshToken);
+                _unitOfWork.Users.Update(user);
+                await _unitOfWork.SaveAsync();
+            }
+
             return userDataDto;
         }
         userDataDto.IsAuth = false;
         userDataDto.Message = $"Wrong credentials of user {user.UserName}.";
         return userDataDto;
     }
+
+    private RefreshToken CreateRefreshToken()
+    {
+        var randomNumber = new byte[32];
+        // se suele usar el ip del usuario en casos reales
+        using (var generator = RandomNumberGenerator.Create())
+        {
+            generator.GetBytes(randomNumber);
+            return new RefreshToken
+            {
+                Token = Convert.ToBase64String(randomNumber),
+                Expires = DateTime.UtcNow.AddDays(10),
+                Created = DateTime.UtcNow
+            };
+        }
+    }
+
 
     private JwtSecurityToken CreateJwtToken(User user)
     {
