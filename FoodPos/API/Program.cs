@@ -54,6 +54,7 @@ using (var scope = app.Services.CreateScope())
         var context = services.GetRequiredService<PosContext>();
         await context.Database.MigrateAsync();
         await PosContextSeed.SeedAsync(context, loggerFactory);
+        await PosContextSeed.SeedRolesAsync(context, loggerFactory);
     }
     catch (Exception ex)
     {

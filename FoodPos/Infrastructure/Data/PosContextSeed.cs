@@ -67,5 +67,28 @@ namespace Infrastructure.Data
                 logger.LogError(ex.Message);
             }
         }
+
+        public static async Task SeedRolesAsync(PosContext context, ILoggerFactory loggerFactory)
+        {
+            try
+            {
+                if (!context.Roles.Any())
+                {
+                    var roles = new List<Role>()
+                        {
+                            new Role{Id=1, Name="Admin"},
+                            new Role{Id=2, Name="Client"},
+                        };
+                    context.Roles.AddRange(roles);
+                    await context.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                var logger = loggerFactory.CreateLogger<PosContextSeed>();
+                logger.LogError(ex.Message);
+            }
+        }
+
     }
 }
