@@ -118,6 +118,50 @@ public class UserService : IUserService
         return userDataDto;
     }
 
+    public async Task<UserDataDto> RefreshTokenAsync(string refreshToken)
+    {
+        var userDataDto = new UserDataDto();
+
+        var user = await _unitOfWork.Users
+                        .GetByRefreshTokenAsync(refreshToken);
+
+        if (user == null)
+        {
+            userDataDto.IsAuth = false;
+            userDataDto.Message = $"The token does not belong to any user.";
+            return userDataDto;
+        }
+
+        var refreshTokenBd = user.RefreshTokens.Single(x => x.Token == refreshToken);
+
+        if (!refreshTokenBd.IsActive)
+        {
+            userDataDto.IsAuth = false;
+            userDataDto.Message = $"The token is not active.";
+            return userDataDto;
+        }
+        //Revocamos el Refresh Token actual y
+        refreshTokenBd.Revoked = DateTime.UtcNow;
+        //generamos un nuevo Refresh Token y lo guardamos en la Base de Datos
+        var newRefreshToken = CreateRefreshToken();
+        user.RefreshTokens.Add(newRefreshToken);
+        _unitOfWork.Users.Update(user);
+        await _unitOfWork.SaveAsync();
+        //Generamos un nuevo Json Web Token
+        userDataDto.IsAuth = true;
+        JwtSecurityToken jwtSecurityToken = CreateJwtToken(user);
+        userDataDto.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+        userDataDto.Email = user.Email;
+        userDataDto.UserName = user.UserName;
+        userDataDto.Roles = user.Roles
+                                        .Select(u => u.Name)
+                                        .ToList();
+        userDataDto.RefreshToken = newRefreshToken.Token;
+        userDataDto.RefreshTokenExpiration = newRefreshToken.Expires;
+        return userDataDto;
+    }
+
+
     private RefreshToken CreateRefreshToken()
     {
         var randomNumber = new byte[32];
