@@ -23,33 +23,40 @@ namespace Infrastructure.Repositories
                             .ToListAsync();
 
         // Sobrescribimos el metodo para que incluya a category y no aparezca null en la respuesta
-        public override async Task<Product> GetByIdAsync(int id)
+        public override async Task<Product> GetByIdAsync(int id, bool noTracking = true)
         {
-            return await _context.Products
+            var queryProduct = noTracking ? _context.Products.AsNoTracking()
+                                        : _context.Products;
+
+            return await queryProduct
                             .Include(p => p.Category)
                             .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public override async Task<IEnumerable<Product>> GetAllAsync()
+        public override async Task<IEnumerable<Product>> GetAllAsync(bool noTracking = true)
         {
-            return await _context.Products
+            var queryProduct = noTracking ? _context.Products.AsNoTracking()
+                                        : _context.Products;
+
+            return await queryProduct
                 .Include(p => p.Category)
                 .ToListAsync();
         }
 
-        public override async Task<(int totalRegisters, IEnumerable<Product> registers)> GetAllAsync(int pageIndex, int pageSize, string search)
+        public override async Task<(int totalRegisters, IEnumerable<Product> registers)> GetAllAsync(int pageIndex, int pageSize, string search, bool noTracking = true)
         {
-            var query = _context.Products as IQueryable<Product>;
+            var queryProduct = noTracking ? _context.Products.AsNoTracking()
+                                        : _context.Products;
 
             if (!String.IsNullOrEmpty(search))
             {
-                query = query.Where(p => p.Name.ToLower().Contains(search));
+                queryProduct = queryProduct.Where(p => p.Name.ToLower().Contains(search));
             }
 
-            var totalRegisters = await query
+            var totalRegisters = await queryProduct
                                         .CountAsync();
 
-            var registers = await query
+            var registers = await queryProduct
                                     .Include(p => p.Category)
                                     .Skip((pageIndex - 1) * pageSize)
                                     .Take(pageSize)

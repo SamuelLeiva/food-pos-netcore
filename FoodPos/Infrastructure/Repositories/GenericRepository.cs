@@ -30,23 +30,28 @@ namespace Infrastructure.Repositories
             _context.Set<T>().AddRange(entities);
         }
 
-        public virtual IEnumerable<T> Find(Expression<Func<T, bool>> expression)
+        public virtual IEnumerable<T> Find(Expression<Func<T, bool>> expression, bool noTracking = true)
         {
-            return _context.Set<T>().Where(expression);
+            return noTracking ? _context.Set<T>().AsNoTracking().Where(expression)
+                                : _context.Set<T>().Where(expression);
         }
 
-        public virtual async Task<IEnumerable<T>> GetAllAsync()
+        public virtual async Task<IEnumerable<T>> GetAllAsync(bool noTracking = true)
         {
-            return await _context.Set<T>().ToListAsync();
+            return noTracking ? await _context.Set<T>().AsNoTracking().ToListAsync()
+                                : await _context.Set<T>().ToListAsync();
         }
 
         // se añade virtual´para colecciones sencillas sin entidades anidadas (en el caso de Product, sobrescribiremos)
-        public virtual async Task<(int totalRegisters, IEnumerable<T> registers)> GetAllAsync(int pageIndex, int pageSize, string search)
+        public virtual async Task<(int totalRegisters, IEnumerable<T> registers)> GetAllAsync(int pageIndex, int pageSize, string search, bool noTracking = true)
         {
-            var totalRegisters = await _context.Set<T>()
+            var query = noTracking ? _context.Set<T>().AsNoTracking().AsQueryable()
+                                    : _context.Set<T>().AsQueryable();
+
+            var totalRegisters = await query
                                 .CountAsync();
 
-            var registers = await _context.Set<T>()
+            var registers = await query
                                     .Skip((pageIndex - 1) * pageSize)
                                     .Take(pageSize)
                                     .ToListAsync();
@@ -55,9 +60,15 @@ namespace Infrastructure.Repositories
         }
 
 
-        public virtual async Task<T> GetByIdAsync(int id)
+        public virtual async Task<T> GetByIdAsync(int id, bool noTracking = true)
         {
-            return await _context.Set<T>().FindAsync(id);
+            var entity = await _context.Set<T>().FindAsync(id);
+
+            if (noTracking)
+            {
+                _context.Entry(entity).State = EntityState.Detached;
+            }
+            return entity;
         }
 
         public virtual void Remove(T entity)
