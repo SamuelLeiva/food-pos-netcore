@@ -1,5 +1,6 @@
 using API;
 using API.Extensions;
+using API.Helpers.Errors;
 using AspNetCoreRateLimit;
 using AutoMapper;
 using Infrastructure.Data;
@@ -36,6 +37,9 @@ builder.Services.AddControllers(options =>
     options.ReturnHttpNotAcceptable = true;
 }).AddXmlSerializerFormatters();
 
+// extension para errores de validación
+builder.Services.AddValidationErrors();
+
 builder.Services.AddDbContext<PosContext>(options =>
 {
     var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -46,6 +50,9 @@ builder.Services.AddDbContext<PosContext>(options =>
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+// middleware para el manejo de excepciones globalmente
+app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseIpRateLimiting();
 
