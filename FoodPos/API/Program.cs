@@ -36,6 +36,7 @@ builder.Services.AddControllers(options =>
     // envía un error en el caso en el que el cliente solicite un formato no permitido
     options.ReturnHttpNotAcceptable = true;
 }).AddXmlSerializerFormatters();
+// solo si serializamos a xml, se hacen los cambios de constructores vacíos, setters, etc
 
 // extension para errores de validación
 builder.Services.AddValidationErrors();

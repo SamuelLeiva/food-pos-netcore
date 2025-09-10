@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize(Roles ="Admin")]
+    // [Authorize(Roles ="Admin")]
     public class ProductsController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;

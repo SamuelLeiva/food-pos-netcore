@@ -5,6 +5,11 @@ public class ApiResponse
     public int StatusCode { get; set; }
     public string Message { get; set; }
 
+    public ApiResponse()
+    {
+
+    }
+
     public ApiResponse(int statusCode, string message = null)
     {
         StatusCode = statusCode;
@@ -19,7 +24,8 @@ public class ApiResponse
             401 => "User not authorized.",
             404 => "The resource requested does not exist.",
             405 => "Http method not allowed in the server.",
-            500 => "Server error. Contact the administrator."
+            500 => "Server error. Contact the administrator.",
+            _ => "Unknown error."
         };
     }
 }
