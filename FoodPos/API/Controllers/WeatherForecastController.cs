@@ -16,6 +16,7 @@ namespace API.Controllers
         public WeatherForecastController(ILogger<WeatherForecastController> logger)
         {
             _logger = logger;
+            _logger.LogInformation("Hola desde el constructor de weatherforecast");
         }
 
         [HttpGet(Name = "GetWeatherForecast")]

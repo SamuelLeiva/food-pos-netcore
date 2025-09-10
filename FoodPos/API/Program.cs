@@ -4,9 +4,18 @@ using AspNetCoreRateLimit;
 using AutoMapper;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
+
+var logger = new LoggerConfiguration()
+    .ReadFrom.Configuration(builder.Configuration)
+    .Enrich.FromLogContext()
+    .CreateLogger();
+
+builder.Logging.ClearProviders(); // limpia los mensajes por defecto en desarrollo, para solo usar nuestro logger
+builder.Logging.AddSerilog(logger);
 
 //AutoMapper
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
@@ -20,11 +29,12 @@ builder.Services.ConfigureApiVersioning();
 builder.Services.AddJwt(builder.Configuration);
 
 //permitimos soporte del formato xml ("Accept": "application/xml")
-builder.Services.AddControllers(options => {
+builder.Services.AddControllers(options =>
+{
     options.RespectBrowserAcceptHeader = true;
     // envía un error en el caso en el que el cliente solicite un formato no permitido
-    options.ReturnHttpNotAcceptable = true; 
-    }).AddXmlSerializerFormatters();
+    options.ReturnHttpNotAcceptable = true;
+}).AddXmlSerializerFormatters();
 
 builder.Services.AddDbContext<PosContext>(options =>
 {
@@ -59,8 +69,8 @@ using (var scope = app.Services.CreateScope())
     }
     catch (Exception ex)
     {
-        var logger = loggerFactory.CreateLogger<Program>();
-        logger.LogError(ex, "An error ocurred during the migration.");
+        var _logger = loggerFactory.CreateLogger<Program>();
+        _logger.LogError(ex, "An error ocurred during the migration.");
     }
 }
 
