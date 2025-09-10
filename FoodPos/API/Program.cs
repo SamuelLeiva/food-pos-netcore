@@ -54,6 +54,8 @@ var app = builder.Build();
 // middleware para el manejo de excepciones globalmente
 app.UseMiddleware<ExceptionMiddleware>();
 
+app.UseStatusCodePagesWithReExecute("/errors/{0}");
+
 app.UseIpRateLimiting();
 
 // Configure the HTTP request pipeline.

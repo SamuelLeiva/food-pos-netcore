@@ -70,6 +70,10 @@ namespace API.Controllers
             if (productDto == null)
                 return NotFound(new ApiResponse(404, "The product requested does not exist."));
 
+            var productDb = await _unitOfWork.Products.GetByIdAsync(id);
+            if (productDb == null)
+                return NotFound(new ApiResponse(404, "The product requested does not exist."));
+
             var product = _mapper.Map<Product>(productDto);
 
             _unitOfWork.Products.Update(product);
