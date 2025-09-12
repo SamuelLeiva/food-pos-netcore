@@ -1,5 +1,6 @@
 ﻿using API.Dtos;
 using API.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;
@@ -27,6 +28,7 @@ public class UsersController : BaseApiController
         return Ok(result);
     }
 
+    [Authorize(Roles = "Admin")]
     [HttpPost("addrole")]
     public async Task<IActionResult> AddRoleAsync(AddRoleDto model)
     {
