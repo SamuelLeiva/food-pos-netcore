@@ -52,6 +52,8 @@ namespace Infrastructure.Data
                                     ImageUrl = item.ImageUrl,
                                     IsActive = item.IsActive,
                                     CategoryId = item.CategoryId,
+                                    CreatedAt = item.CreatedAt,
+                                    UpdatedAt = item.UpdatedAt
                                 });
                             }
 
@@ -76,8 +78,8 @@ namespace Infrastructure.Data
                 {
                     var roles = new List<Role>()
                         {
-                            new Role{Id=1, Name="Admin"},
-                            new Role{Id=2, Name="Client"},
+                            new Role{Id=1, Name="Admin", CreatedAt=DateTime.UtcNow, UpdatedAt=DateTime.UtcNow },
+                            new Role{Id=2, Name="Client", CreatedAt=DateTime.UtcNow, UpdatedAt=DateTime.UtcNow},
                         };
                     context.Roles.AddRange(roles);
                     await context.SaveChangesAsync();

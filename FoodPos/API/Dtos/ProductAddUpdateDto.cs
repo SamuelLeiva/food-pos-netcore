@@ -5,7 +5,7 @@ namespace API.Dtos
 {
     public class ProductAddUpdateDto
     {
-        public int Id { get; set; }
+        //public int Id { get; set; }
         [Required(ErrorMessage = "Product's name is required.")]
         public string Name { get; set; }
         [Required(ErrorMessage = "Product's description is required.")]

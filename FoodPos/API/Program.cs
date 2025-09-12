@@ -15,7 +15,7 @@ var logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .CreateLogger();
 
-builder.Logging.ClearProviders(); // limpia los mensajes por defecto en desarrollo, para solo usar nuestro logger
+//builder.Logging.ClearProviders(); // limpia los mensajes por defecto en desarrollo, para solo usar nuestro logger
 builder.Logging.AddSerilog(logger);
 
 //AutoMapper

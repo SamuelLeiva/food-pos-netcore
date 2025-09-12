@@ -57,8 +57,9 @@ namespace API.Controllers
             {
                 return BadRequest(new ApiResponse(400));
             }
-            productDto.Id = product.Id;
-            return CreatedAtAction(nameof(Post), new { id = productDto.Id }, productDto);
+
+            //productDto.Id = product.Id;
+            return CreatedAtAction(nameof(Post), new { id = product.Id }, productDto);
         }
 
         [HttpPut("{id}")]
@@ -74,9 +75,11 @@ namespace API.Controllers
             if (productDb == null)
                 return NotFound(new ApiResponse(404, "The product requested does not exist."));
 
-            var product = _mapper.Map<Product>(productDto);
+            //var product = _mapper.Map<Product>(productDto);
+            _mapper.Map(productDto, productDb);
 
-            _unitOfWork.Products.Update(product);
+            //_unitOfWork.Products.Update(product);
+            productDb.UpdatedAt = DateTime.Now;
             await _unitOfWork.SaveAsync();
 
             return productDto;

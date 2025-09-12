@@ -1,51 +1,51 @@
-﻿Id,Name,Description,Price,ImageUrl,IsActive,CategoryId
-1,Classic Beef Burger,A juicy beef patty with lettuce tomato and cheese on a brioche bun.,9.99,https://example.com/images/classic-beef-burger.jpg,true,1
-2,Spicy Chicken Burger,Crispy chicken fillet with spicy mayo jalapeños and fresh coleslaw.,10.49,https://example.com/images/spicy-chicken-burger.jpg,true,1
-3,Veggie Burger,A plant-based patty with avocado sprouts and vegan aioli.,8.99,https://example.com/images/veggie-burger.jpg,true,1
-4,Double Cheeseburger,Two beef patties with double cheese pickles onions and ketchup.,11.99,https://example.com/images/double-cheeseburger.jpg,true,1
-5,Bacon & Egg Burger,Grilled bacon a fried egg and melted cheddar on a toasted bun.,12.99,https://example.com/images/bacon-egg-burger.jpg,true,1
-6,Mushroom Swiss Burger,Sautéed mushrooms and Swiss cheese over a ground beef patty.,10.99,https://example.com/images/mushroom-swiss-burger.jpg,true,1
-7,BBQ Pulled Pork Burger,Slow-cooked pulled pork in BBQ sauce with coleslaw.,11.50,https://example.com/images/bbq-pork-burger.jpg,true,1
-8,Hawaiian Burger,Beef patty topped with grilled pineapple bacon and teriyaki sauce.,13.50,https://example.com/images/hawaiian-burger.jpg,true,1
-9,Turkey Burger,Lean turkey patty with cranberry aioli and lettuce.,9.50,https://example.com/images/turkey-burger.jpg,true,1
-10,Smoked Gouda Burger,Beef patty with smoked gouda cheese crispy onions and a special sauce.,12.25,https://example.com/images/gouda-burger.jpg,true,1
-11,Beef Barbacoa Tacos,Slow-cooked beef barbacoa with cilantro and onions on corn tortillas.,12.50,https://example.com/images/barbacoa-tacos.jpg,true,2
-12,Spicy Shrimp Tacos,Sautéed shrimp with a chili-lime sauce and a hint of cilantro.,13.75,https://example.com/images/shrimp-tacos.jpg,true,2
-13,Fish Tacos,Grilled white fish with cabbage slaw pico de gallo and a creamy chipotle sauce.,14.00,https://example.com/images/fish-tacos.jpg,true,2
-14,Carne Asada Tacos,Grilled steak finely chopped and served with guacamole and pico de gallo.,13.00,https://example.com/images/carne-asada-tacos.jpg,true,2
-15,Al Pastor Tacos,Marinated pork tacos with grilled pineapple onions and cilantro.,12.75,https://example.com/images/al-pastor-tacos.jpg,true,2
-16,Chicken Tinga Tacos,Shredded chicken in a smoky chipotle tomato sauce.,11.50,https://example.com/images/chicken-tinga-tacos.jpg,true,2
-17,Mushroom Tacos,Sautéed mushrooms and bell peppers with feta cheese.,10.99,https://example.com/images/mushroom-tacos.jpg,true,2
-18,Taco de Pescado Baja,Crispy battered fish spicy mayo and cabbage slaw.,14.25,https://example.com/images/taco-pescado-baja.jpg,true,2
-19,Taco de Chorizo,Spicy Mexican sausage with diced onions and cilantro.,11.25,https://example.com/images/taco-chorizo.jpg,true,2
-20,Taco de Nopales,Grilled cactus paddles with roasted corn and a touch of lime.,10.50,https://example.com/images/taco-nopales.jpg,true,2
-21,Chicken Fajita Wrap,Grilled chicken peppers and onions with melted cheese in a flour tortilla.,11.99,https://example.com/images/chicken-fajita-wrap.jpg,true,3
-22,Falafel Hummus Wrap,Crispy falafel creamy hummus and fresh vegetables in a wrap.,10.50,https://example.com/images/falafel-hummus-wrap.jpg,true,3
-23,Grilled Chicken Salad Wrap,Grilled chicken mixed greens cherry tomatoes and balsamic glaze in a whole wheat wrap.,12.25,https://example.com/images/chicken-salad-wrap.jpg,true,3
-24,Steak & Cheese Wrap,Thinly sliced steak with grilled onions and provolone cheese.,13.50,https://example.com/images/steak-cheese-wrap.jpg,true,3
-25,Spicy Black Bean Wrap,Black beans corn salsa avocado and a spicy ranch dressing.,10.75,https://example.com/images/black-bean-wrap.jpg,true,3
-26,Mediterranean Veggie Wrap,Cucumbers tomatoes olives red onions and feta cheese with tzatziki sauce.,11.25,https://example.com/images/mediterranean-veggie-wrap.jpg,true,3
-27,Turkey Club Wrap,Sliced turkey bacon lettuce tomato and mayo.,12.50,https://example.com/images/turkey-club-wrap.jpg,true,3
-28,Buffalo Chicken Wrap,Crispy chicken tossed in buffalo sauce with lettuce and blue cheese dressing.,11.99,https://example.com/images/buffalo-chicken-wrap.jpg,true,3
-29,Caesar Chicken Wrap,Grilled chicken romaine lettuce parmesan cheese and Caesar dressing.,11.75,https://example.com/images/caesar-chicken-wrap.jpg,true,3
-30,Tuna Salad Wrap,Classic tuna salad with fresh celery and mayo.,10.99,https://example.com/images/tuna-salad-wrap.jpg,true,3
-31,Chocolate Lava Cake,Warm chocolate cake with a molten center served with vanilla ice cream.,6.99,https://example.com/images/lava-cake.jpg,true,4
-32,New York Cheesecake,A classic creamy cheesecake with a graham cracker crust.,7.50,https://example.com/images/cheesecake.jpg,true,4
-33,Apple Pie,A slice of warm apple pie with a flaky crust and cinnamon.,6.50,https://example.com/images/apple-pie.jpg,true,4
-34,Brownie Sundae,A warm chocolate brownie topped with ice cream chocolate syrup and whipped cream.,8.50,https://example.com/images/brownie-sundae.jpg,true,4
-35,Tiramisu,Layers of coffee-soaked ladyfingers and mascarpone cheese.,7.99,https://example.com/images/tiramisu.jpg,true,4
-36,Crème Brûlée,Creamy vanilla custard with a crispy caramelized sugar topping.,7.25,https://example.com/images/creme-brulee.jpg,true,4
-37,Key Lime Pie,A tart and sweet pie with a graham cracker crust.,6.75,https://example.com/images/key-lime-pie.jpg,true,4
-38,Red Velvet Cake,Moist red velvet cake with cream cheese frosting.,7.00,https://example.com/images/red-velvet-cake.jpg,true,4
-39,Chocolate Chip Cookies,Two large fresh-baked chocolate chip cookies.,4.50,https://example.com/images/cookies.jpg,true,4
-40,Ice Cream Scoop,One scoop of your choice of vanilla chocolate or strawberry ice cream.,3.00,https://example.com/images/ice-cream-scoop.jpg,true,4
-41,Strawberry Milkshake,A rich and creamy milkshake made with fresh strawberries.,5.50,https://example.com/images/strawberry-shake.jpg,true,5
-42,Iced Coffee,Freshly brewed iced coffee with a shot of caramel.,4.25,https://example.com/images/iced-coffee.jpg,true,5
-43,Water Bottle,A 500ml bottle of purified water.,2.00,https://example.com/images/water-bottle.jpg,true,5
-44,Lemonade,Freshly squeezed lemonade.,3.50,https://example.com/images/lemonade.jpg,true,5
-45,Hot Tea,A selection of black green or herbal teas.,2.50,https://example.com/images/hot-tea.jpg,true,5
-46,Orange Juice,Freshly squeezed orange juice.,4.00,https://example.com/images/orange-juice.jpg,true,5
-47,Coca-Cola,A classic bottle of Coca-Cola.,3.00,https://example.com/images/coca-cola.jpg,true,5
-48,Smoothie,A blend of mixed berries banana and yogurt.,6.50,https://example.com/images/smoothie.jpg,true,5
-49,Sparkling Water,A bottle of sparkling mineral water.,3.25,https://example.com/images/sparkling-water.jpg,true,5
-50,Hot Chocolate,Rich and creamy hot chocolate topped with marshmallows.,4.75,https://example.com/images/hot-chocolate.jpg,true,5
+﻿Id,Name,Description,Price,ImageUrl,IsActive,CategoryId,CreatedAt,UpdatedAt
+1,Classic Beef Burger,A juicy beef patty with lettuce tomato and cheese on a brioche bun.,9.99,https://example.com/images/classic-beef-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+2,Spicy Chicken Burger,Crispy chicken fillet with spicy mayo jalapeños and fresh coleslaw.,10.49,https://example.com/images/spicy-chicken-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+3,Veggie Burger,A plant-based patty with avocado sprouts and vegan aioli.,8.99,https://example.com/images/veggie-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+4,Double Cheeseburger,Two beef patties with double cheese pickles onions and ketchup.,11.99,https://example.com/images/double-cheeseburger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+5,Bacon & Egg Burger,Grilled bacon a fried egg and melted cheddar on a toasted bun.,12.99,https://example.com/images/bacon-egg-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+6,Mushroom Swiss Burger,Sautéed mushrooms and Swiss cheese over a ground beef patty.,10.99,https://example.com/images/mushroom-swiss-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+7,BBQ Pulled Pork Burger,Slow-cooked pulled pork in BBQ sauce with coleslaw.,11.50,https://example.com/images/bbq-pork-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+8,Hawaiian Burger,Beef patty topped with grilled pineapple bacon and teriyaki sauce.,13.50,https://example.com/images/hawaiian-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+9,Turkey Burger,Lean turkey patty with cranberry aioli and lettuce.,9.50,https://example.com/images/turkey-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+10,Smoked Gouda Burger,Beef patty with smoked gouda cheese crispy onions and a special sauce.,12.25,https://example.com/images/gouda-burger.jpg,true,1,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+11,Beef Barbacoa Tacos,Slow-cooked beef barbacoa with cilantro and onions on corn tortillas.,12.50,https://example.com/images/barbacoa-tacos.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+12,Spicy Shrimp Tacos,Sautéed shrimp with a chili-lime sauce and a hint of cilantro.,13.75,https://example.com/images/shrimp-tacos.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+13,Fish Tacos,Grilled white fish with cabbage slaw pico de gallo and a creamy chipotle sauce.,14.00,https://example.com/images/fish-tacos.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+14,Carne Asada Tacos,Grilled steak finely chopped and served with guacamole and pico de gallo.,13.00,https://example.com/images/carne-asada-tacos.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+15,Al Pastor Tacos,Marinated pork tacos with grilled pineapple onions and cilantro.,12.75,https://example.com/images/al-pastor-tacos.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+16,Chicken Tinga Tacos,Shredded chicken in a smoky chipotle tomato sauce.,11.50,https://example.com/images/chicken-tinga-tacos.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+17,Mushroom Tacos,Sautéed mushrooms and bell peppers with feta cheese.,10.99,https://example.com/images/mushroom-tacos.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+18,Taco de Pescado Baja,Crispy battered fish spicy mayo and cabbage slaw.,14.25,https://example.com/images/taco-pescado-baja.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+19,Taco de Chorizo,Spicy Mexican sausage with diced onions and cilantro.,11.25,https://example.com/images/taco-chorizo.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+20,Taco de Nopales,Grilled cactus paddles with roasted corn and a touch of lime.,10.50,https://example.com/images/taco-nopales.jpg,true,2,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+21,Chicken Fajita Wrap,Grilled chicken peppers and onions with melted cheese in a flour tortilla.,11.99,https://example.com/images/chicken-fajita-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+22,Falafel Hummus Wrap,Crispy falafel creamy hummus and fresh vegetables in a wrap.,10.50,https://example.com/images/falafel-hummus-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+23,Grilled Chicken Salad Wrap,Grilled chicken mixed greens cherry tomatoes and balsamic glaze in a whole wheat wrap.,12.25,https://example.com/images/chicken-salad-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+24,Steak & Cheese Wrap,Thinly sliced steak with grilled onions and provolone cheese.,13.50,https://example.com/images/steak-cheese-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+25,Spicy Black Bean Wrap,Black beans corn salsa avocado and a spicy ranch dressing.,10.75,https://example.com/images/black-bean-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+26,Mediterranean Veggie Wrap,Cucumbers tomatoes olives red onions and feta cheese with tzatziki sauce.,11.25,https://example.com/images/mediterranean-veggie-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+27,Turkey Club Wrap,Sliced turkey bacon lettuce tomato and mayo.,12.50,https://example.com/images/turkey-club-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+28,Buffalo Chicken Wrap,Crispy chicken tossed in buffalo sauce with lettuce and blue cheese dressing.,11.99,https://example.com/images/buffalo-chicken-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+29,Caesar Chicken Wrap,Grilled chicken romaine lettuce parmesan cheese and Caesar dressing.,11.75,https://example.com/images/caesar-chicken-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+30,Tuna Salad Wrap,Classic tuna salad with fresh celery and mayo.,10.99,https://example.com/images/tuna-salad-wrap.jpg,true,3,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+31,Chocolate Lava Cake,Warm chocolate cake with a molten center served with vanilla ice cream.,6.99,https://example.com/images/lava-cake.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+32,New York Cheesecake,A classic creamy cheesecake with a graham cracker crust.,7.50,https://example.com/images/cheesecake.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+33,Apple Pie,A slice of warm apple pie with a flaky crust and cinnamon.,6.50,https://example.com/images/apple-pie.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+34,Brownie Sundae,A warm chocolate brownie topped with ice cream chocolate syrup and whipped cream.,8.50,https://example.com/images/brownie-sundae.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+35,Tiramisu,Layers of coffee-soaked ladyfingers and mascarpone cheese.,7.99,https://example.com/images/tiramisu.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+36,Crème Brûlée,Creamy vanilla custard with a crispy caramelized sugar topping.,7.25,https://example.com/images/creme-brulee.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+37,Key Lime Pie,A tart and sweet pie with a graham cracker crust.,6.75,https://example.com/images/key-lime-pie.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+38,Red Velvet Cake,Moist red velvet cake with cream cheese frosting.,7.00,https://example.com/images/red-velvet-cake.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+39,Chocolate Chip Cookies,Two large fresh-baked chocolate chip cookies.,4.50,https://example.com/images/cookies.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+40,Ice Cream Scoop,One scoop of your choice of vanilla chocolate or strawberry ice cream.,3.00,https://example.com/images/ice-cream-scoop.jpg,true,4,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+41,Strawberry Milkshake,A rich and creamy milkshake made with fresh strawberries.,5.50,https://example.com/images/strawberry-shake.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+42,Iced Coffee,Freshly brewed iced coffee with a shot of caramel.,4.25,https://example.com/images/iced-coffee.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+43,Water Bottle,A 500ml bottle of purified water.,2.00,https://example.com/images/water-bottle.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+44,Lemonade,Freshly squeezed lemonade.,3.50,https://example.com/images/lemonade.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+45,Hot Tea,A selection of black green or herbal teas.,2.50,https://example.com/images/hot-tea.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+46,Orange Juice,Freshly squeezed orange juice.,4.00,https://example.com/images/orange-juice.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+47,Coca-Cola,A classic bottle of Coca-Cola.,3.00,https://example.com/images/coca-cola.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+48,Smoothie,A blend of mixed berries banana and yogurt.,6.50,https://example.com/images/smoothie.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+49,Sparkling Water,A bottle of sparkling mineral water.,3.25,https://example.com/images/sparkling-water.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
+50,Hot Chocolate,Rich and creamy hot chocolate topped with marshmallows.,4.75,https://example.com/images/hot-chocolate.jpg,true,5,2025-09-12T17:40:02Z,2025-09-12T17:40:02Z
