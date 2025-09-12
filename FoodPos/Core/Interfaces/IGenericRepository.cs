@@ -10,10 +10,10 @@ namespace Core.Interfaces
 {
     public interface IGenericRepository<T> where T : BaseEntity
     {
-        Task<T> GetByIdAsync(int id, bool noTracking = true);
-        Task<IEnumerable<T>> GetAllAsync(bool noTracking = true);
-        IEnumerable<T> Find(Expression<Func<T, bool>> expression, bool noTracking = true);
-        Task<(int totalRegisters, IEnumerable<T> registers)> GetAllAsync(int pageIndex, int pageSize, string search, bool noTracking = true);
+        Task<T> GetByIdAsync(int id);
+        Task<IEnumerable<T>> GetAllAsync();
+        IEnumerable<T> Find(Expression<Func<T, bool>> expression);
+        Task<(int totalRegisters, IEnumerable<T> registers)> GetAllAsync(int pageIndex, int pageSize, string search);
         void Add(T entity);
         void AddRange(IEnumerable<T> entities);
         void Remove(T entity);
