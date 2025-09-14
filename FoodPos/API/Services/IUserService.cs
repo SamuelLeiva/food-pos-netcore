@@ -1,4 +1,4 @@
-﻿using API.Dtos;
+﻿using API.Dtos.Users;
 
 namespace API.Services;
 

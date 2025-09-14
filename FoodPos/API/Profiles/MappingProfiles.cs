@@ -1,4 +1,5 @@
-﻿using API.Dtos;
+﻿using API.Dtos.Categories;
+using API.Dtos.Products;
 using API.Dtos.Role;
 using AutoMapper;
 using Core.Entities;

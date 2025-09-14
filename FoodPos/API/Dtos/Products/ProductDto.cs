@@ -1,6 +1,7 @@
-﻿using Core.Entities;
+﻿using API.Dtos.Categories;
+using Core.Entities;
 
-namespace API.Dtos
+namespace API.Dtos.Products
 {
     public class ProductDto
     {

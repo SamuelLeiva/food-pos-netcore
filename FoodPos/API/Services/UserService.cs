@@ -1,4 +1,4 @@
-﻿using API.Dtos;
+﻿using API.Dtos.Users;
 using API.Helpers;
 using Core.Entities;
 using Core.Interfaces;
@@ -41,7 +41,7 @@ public class UserService : IUserService
         usuario.Password = _passwordHasher.HashPassword(usuario, registerDto.Password);
 
         var userExists = _unitOfWork.Users
-                                    .Find(u => u.UserName.ToLower() == registerDto.UserName.ToLower())
+                                    .Find(u => u.UserName.ToLower() == registerDto.UserName.ToLower() || u.Email.ToLower() == registerDto.Email.ToLower())
                                     .FirstOrDefault();
 
         if (userExists == null)
@@ -65,7 +65,7 @@ public class UserService : IUserService
         }
         else
         {
-            return $"The user {registerDto.UserName} is already registered.";
+            return $"Email: {registerDto.Email} is already registered.";
         }
     }
 

@@ -1,11 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace API.Dtos;
+namespace API.Dtos.Users;
 
-public class LoginDto
+public class AddRoleDto
 {
     [Required]
     public string UserName { get; set; }
     [Required]
     public string Password { get; set; }
+    [Required]
+    public string Role { get; set; }
 }
+    

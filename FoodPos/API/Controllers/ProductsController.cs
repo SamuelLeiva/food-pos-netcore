@@ -1,4 +1,4 @@
-﻿using API.Dtos;
+﻿using API.Dtos.Products;
 using API.Helpers;
 using API.Helpers.Errors;
 using AutoMapper;
@@ -48,19 +48,28 @@ namespace API.Controllers
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status201Created)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<Product>> Post(ProductAddUpdateDto productDto)
         {
             var product = _mapper.Map<Product>(productDto);
-
-            _unitOfWork.Products.Add(product);
-            await _unitOfWork.SaveAsync();
             if (product == null)
             {
                 return BadRequest(new ApiResponse(400));
             }
 
-            //productDto.Id = product.Id;
-            return CreatedAtAction(nameof(Post), new { id = product.Id }, productDto);
+            var productExists = _unitOfWork.Products
+                                    .Find(p => p.Name.ToLower() == productDto.Name.ToLower())
+                                    .FirstOrDefault();
+
+            if (productExists != null)
+            {
+                _unitOfWork.Products.Add(product);
+                await _unitOfWork.SaveAsync();
+                return CreatedAtAction(nameof(Post), new { id = product.Id }, productDto);
+            } else
+            {
+                return Conflict(new ApiResponse(409, "A product with the same name already exists."));
+            }            
         }
 
         [HttpPut("{id}")]
@@ -68,6 +77,7 @@ namespace API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status409Conflict)]
         public async Task<ActionResult<ProductAddUpdateDto>> Put(int id, [FromBody] ProductAddUpdateDto productDto)
         {
             if (productDto == null)
@@ -77,10 +87,15 @@ namespace API.Controllers
             if (productDb == null)
                 return NotFound(new ApiResponse(404, "The product requested does not exist."));
 
-            //var product = _mapper.Map<Product>(productDto);
+            var productExists = _unitOfWork.Products
+                                    .Find(p => p.Name.ToLower() == productDto.Name.ToLower() && p.Id != id)
+                                    .FirstOrDefault();
+
+            if(productExists != null)
+                return Conflict(new ApiResponse(409, "Another product with the same name already exists."));
+
             _mapper.Map(productDto, productDb);
 
-            //_unitOfWork.Products.Update(product);
             productDb.UpdatedAt = DateTime.Now;
             await _unitOfWork.SaveAsync();
 

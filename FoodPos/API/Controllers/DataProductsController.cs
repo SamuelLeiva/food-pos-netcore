@@ -1,4 +1,4 @@
-﻿using API.Dtos;
+﻿using API.Dtos.Products;
 using Asp.Versioning;
 using AutoMapper;
 using Core.Interfaces;

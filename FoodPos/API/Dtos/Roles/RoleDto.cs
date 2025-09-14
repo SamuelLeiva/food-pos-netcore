@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace API.Dtos.Role;
+namespace API.Dtos.Roles;
 
 public class RoleDto
 {

@@ -1,7 +1,7 @@
 ﻿using Core.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace API.Dtos
+namespace API.Dtos.Products
 {
     public class ProductAddUpdateDto
     {
