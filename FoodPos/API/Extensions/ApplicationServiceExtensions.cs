@@ -1,6 +1,7 @@
 ﻿using API.Helpers;
 using API.Helpers.Errors;
 using API.Services;
+using API.Services.Interfaces;
 using Asp.Versioning;
 using AspNetCoreRateLimit;
 using Core.Entities;
@@ -29,11 +30,9 @@ public static class ApplicationServiceExtensions
 
     public static void AddApplicationServices(this IServiceCollection services)
     {
-        //services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
-        //services.AddScoped<IProductRepository, ProductRepository>();
-        //services.AddScoped<ICategoryRepository, CategoryRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
     }
 

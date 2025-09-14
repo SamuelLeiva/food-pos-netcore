@@ -1,6 +1,6 @@
 ﻿using API.Dtos.Categories;
 using API.Dtos.Products;
-using API.Dtos.Role;
+using API.Dtos.Roles;
 using AutoMapper;
 using Core.Entities;
 
@@ -24,7 +24,7 @@ public class MappingProfiles : Profile
             .ReverseMap()
             .ForMember(src => src.Category, dest => dest.Ignore());
 
-        CreateMap<Role, RoleDto>()
+        CreateMap<Role, CreateRoleDto>()
             .ReverseMap();
 
     }

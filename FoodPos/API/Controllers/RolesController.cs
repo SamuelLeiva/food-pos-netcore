@@ -1,6 +1,6 @@
-﻿using API.Dtos;
-using API.Dtos.Roles;
+﻿using API.Dtos.Roles;
 using API.Helpers.Errors;
+using API.Services.Interfaces;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
@@ -12,13 +12,11 @@ namespace API.Controllers;
 [Authorize(Roles = "Admin")]
 public class RolesController : BaseApiController
 {
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IMapper _mapper;
+    private readonly IRoleService _roleService;
 
-    public RolesController(IUnitOfWork unitOfWork, IMapper mapper)
+    public RolesController(IRoleService roleService)
     {
-        _unitOfWork = unitOfWork;
-        _mapper = mapper;
+        _roleService = roleService;
     }
 
     [HttpPost]
@@ -27,23 +25,13 @@ public class RolesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<Role>> Post(CreateRoleDto roleDto)
     {
-        var roleExists = _unitOfWork.Roles
-                                    .Find(r => r.Name.ToLower() == roleDto.Name.ToLower())
-                                    .FirstOrDefault();
-        if (roleExists != null)
-            return Conflict(new ApiResponse(409, "The role with the same name already exists."));
-
-        var role = _mapper.Map<Role>(roleDto);
-
-        _unitOfWork.Roles.Add(role);
-        await _unitOfWork.SaveAsync();
-
-        if (role == null)
+        var result = await _roleService.CreateRoleAsync(roleDto);
+        if (!result.IsSuccess)
         {
-            return BadRequest(new ApiResponse(400));
+            return Conflict(new ApiResponse(409, result.ErrorMessage));
         }
 
-        return CreatedAtAction(nameof(Post), roleDto);
+        return CreatedAtAction(nameof(Post), result.Data);
     }
 
     [HttpDelete("{id}")]
@@ -51,12 +39,11 @@ public class RolesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
-        var role = await _unitOfWork.Roles.GetByIdAsync(id);
-        if (role == null)
-            return NotFound(new ApiResponse(404, "The role requested does not exist."));
-
-        _unitOfWork.Roles.Remove(role);
-        await _unitOfWork.SaveAsync();
+        var result = await _roleService.DeleteRoleAsync(id);
+        if (!result.IsSuccess)
+        {
+            return NotFound(new ApiResponse(404, result.ErrorMessage));
+        }
 
         return NoContent();
     }
