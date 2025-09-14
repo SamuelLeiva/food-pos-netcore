@@ -25,7 +25,7 @@ public class RolesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<Role>> Post(RoleDto roleDto)
+    public async Task<ActionResult<Role>> Post(CreateRoleDto roleDto)
     {
         var roleExists = _unitOfWork.Roles
                                     .Find(r => r.Name.ToLower() == roleDto.Name.ToLower())
