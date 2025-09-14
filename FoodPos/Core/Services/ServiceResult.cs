@@ -18,3 +18,5 @@ public class ServiceResult<T>
     public static ServiceResult<T> Success(T data) => new ServiceResult<T> { IsSuccess = true, Data = data };
     public static ServiceResult<T> Failure(string errorMessage) => new ServiceResult<T> { IsSuccess = false, ErrorMessage = errorMessage };
 }
+
+

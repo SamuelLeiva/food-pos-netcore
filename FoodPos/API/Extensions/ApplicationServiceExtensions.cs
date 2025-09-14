@@ -33,6 +33,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IRoleService, RoleService>();
+        services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
     }
 

@@ -42,17 +42,17 @@ public class RoleService : IRoleService
         return ServiceResult<Role>.Success(role);
     }
 
-    public async Task<ServiceResult> DeleteRoleAsync(int id)
+    public async Task<Core.Services.ServiceResult> DeleteRoleAsync(int id)
     {
         var role = await _unitOfWork.Roles.GetByIdAsync(id);
         if (role == null)
         {
-            return ServiceResult.Failure("The role requested does not exist.");
+            return Core.Services.ServiceResult.Failure("The role requested does not exist.");
         }
 
         _unitOfWork.Roles.Remove(role);
         await _unitOfWork.SaveAsync();
 
-        return ServiceResult.Success();
+        return Core.Services.ServiceResult.Success();
     }
 }
