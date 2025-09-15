@@ -27,5 +27,9 @@ public class MappingProfiles : Profile
         CreateMap<Role, CreateRoleDto>()
             .ReverseMap();
 
+        CreateMap<Category, CategoryDto>()
+            .ReverseMap();
+        CreateMap<Category, CategoryAddUpdateDto>()
+            .ReverseMap();
     }
 }
