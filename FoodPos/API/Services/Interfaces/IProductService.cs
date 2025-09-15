@@ -1,6 +1,5 @@
 ﻿using API.Dtos.Products;
 using API.Helpers;
-using Core.Entities;
 using Core.Services;
 
 namespace API.Services.Interfaces;
