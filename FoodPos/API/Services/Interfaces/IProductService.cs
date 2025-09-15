@@ -11,4 +11,5 @@ public interface IProductService
     Task<ServiceResult> DeleteProductAsync(int id);
     Task<Pager<ProductDto>> GetProductsAsync(Params productParams);
     Task<ServiceResult<ProductDto>> GetProductByIdAsync(int id);
+    Task<Pager<ProductDto>> GetProductsByCategoryAsync(int categoryId ,Params productParams);
 }

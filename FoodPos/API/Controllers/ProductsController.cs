@@ -30,6 +30,15 @@ namespace API.Controllers
             return Ok(result);
         }
 
+        [HttpGet("category/{categoryId}")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<Pager<ProductListDto>>> Get(int categoryId, [FromQuery] Params productParams)
+        {
+            var result = await _productService.GetProductsByCategoryAsync(categoryId, productParams);
+            return Ok(result);
+        }
+
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]

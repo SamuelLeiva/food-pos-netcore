@@ -67,8 +67,11 @@ namespace Infrastructure.Repositories
                 query = query.Where(p => p.Name.ToLower().Contains(search));
             }
 
+            Console.WriteLine("CategoryId: " + categoryId);
+
+            query = query.Where(p => p.CategoryId == categoryId);
+
             var totalRegisters = await query
-                                        .Where(p => p.CategoryId == categoryId)
                                         .CountAsync();
 
             var registers = await query

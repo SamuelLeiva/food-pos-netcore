@@ -95,4 +95,11 @@ public class ProductService : IProductService
 
         return ServiceResult.Success();
     }
+
+    public async Task<Pager<ProductDto>> GetProductsByCategoryAsync(int categoryId, Params productParams)
+    {
+        var result = await _unitOfWork.Products.GetProductsByCategoryIdAsync(categoryId, productParams.PageIndex, productParams.PageSize, productParams.Search);
+        var productsListDto = _mapper.Map<List<ProductDto>>(result.registers);
+        return new Pager<ProductDto>(productsListDto, result.totalRegisters, productParams.PageIndex, productParams.PageSize, productParams.Search);
+    }
 }
