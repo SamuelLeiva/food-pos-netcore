@@ -58,6 +58,27 @@ namespace Infrastructure.Repositories
             return (totalRegisters, registers);
         }
 
+        public async Task<(int totalRegisters, IEnumerable<Product> registers)> GetProductsByCategoryIdAsync(int categoryId, int pageIndex, int pageSize, string search)
+        {
+            var query = _context.Products as IQueryable<Product>;
+
+            if (!String.IsNullOrEmpty(search))
+            {
+                query = query.Where(p => p.Name.ToLower().Contains(search));
+            }
+
+            var totalRegisters = await query
+                                        .Where(p => p.CategoryId == categoryId)
+                                        .CountAsync();
+
+            var registers = await query
+                                    .Include(p => p.Category)
+                                    .Skip((pageIndex - 1) * pageSize)
+                                    .Take(pageSize)
+                                    .ToListAsync();
+
+            return (totalRegisters, registers);
+        }
     }
 
 }

@@ -10,6 +10,7 @@ namespace Core.Interfaces
     public interface IProductRepository : IGenericRepository<Product>
     {
         Task<IEnumerable<Product>> GetMostExpensiveProducts(int cantidad);
+        Task<(int totalRegisters, IEnumerable<Product> registers)> GetProductsByCategoryIdAsync(int categoryId, int pageIndex, int pageSize, string search);
     }
 
 }
