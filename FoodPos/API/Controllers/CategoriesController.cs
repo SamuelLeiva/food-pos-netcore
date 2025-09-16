@@ -19,9 +19,18 @@ public class CategoriesController : BaseApiController
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<List<CategoryDto>>> Get()
+    {
+        var result = await _categoryService.GetCategoriesAsync();
+        return Ok(result);
+    }
+
+    [HttpGet("paginated")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<Pager<CategoryDto>>> Get([FromQuery] Params categoryParams)
     {
-        var result = await _categoryService.GetCategoriesAsync(categoryParams);
+        var result = await _categoryService.GetCategoriesPaginatedAsync(categoryParams);
         return Ok(result);
     }
 

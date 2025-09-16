@@ -21,7 +21,7 @@ builder.Logging.AddSerilog(logger);
 //AutoMapper
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
 
-builder.Services.ConfigureRateLimiting();
+//builder.Services.ConfigureRateLimiting();
 
 // Add services to the container.
 builder.Services.ConfigureCors();
@@ -57,7 +57,7 @@ app.UseMiddleware<ExceptionMiddleware>();
 
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
 
-app.UseIpRateLimiting();
+//app.UseIpRateLimiting();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

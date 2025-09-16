@@ -48,11 +48,18 @@ public class CategoryService : ICategoryService
         return ServiceResult.Success();
     }
 
-    public async Task<Pager<CategoryDto>> GetCategoriesAsync(Params categoryParams)
+    public async Task<Pager<CategoryDto>> GetCategoriesPaginatedAsync(Params categoryParams)
     {
         var result = await _unitOfWork.Categories.GetAllAsync(categoryParams.PageIndex, categoryParams.PageSize, categoryParams.Search);
         var categoriesListDto = _mapper.Map<List<CategoryDto>>(result.registers);
         return new Pager<CategoryDto>(categoriesListDto, result.totalRegisters, categoryParams.PageIndex, categoryParams.PageSize, categoryParams.Search);
+    }
+
+    public async Task<ServiceResult<List<CategoryDto>>> GetCategoriesAsync()
+    {
+        var result = await _unitOfWork.Categories.GetAllAsync();
+        var categoriesListDto = _mapper.Map<List<CategoryDto>>(result);
+        return ServiceResult<List<CategoryDto>>.Success(categoriesListDto);
     }
 
     public async Task<ServiceResult<CategoryDto>> GetCategoryByIdAsync(int id)

@@ -38,7 +38,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
     }
 
-    public static void ConfigureRateLimiting(this IServiceCollection services) 
+    public static void ConfigureRateLimiting(this IServiceCollection services)
     {
         services.AddMemoryCache();
         services.AddSingleton<IRateLimitConfiguration, RateLimitConfiguration>();
