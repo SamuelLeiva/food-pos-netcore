@@ -24,9 +24,9 @@ public class RegisterDto
     [StringLength(100, ErrorMessage = "El email no puede exceder los 100 caracteres.")]
     public string Email { get; set; }
 
-    [Required(ErrorMessage = "El nombre de usuario es obligatorio.")]
-    [StringLength(20, MinimumLength = 5, ErrorMessage = "El nombre de usuario debe tener entre 5 y 20 caracteres.")]
-    [RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = "El nombre de usuario solo puede contener letras y números.")]
+    [Required(ErrorMessage = "El username es obligatorio.")]
+    [EmailAddress(ErrorMessage = "El formato del username no es válido.")]
+    [StringLength(100, ErrorMessage = "El username no puede exceder los 100 caracteres.")]
     public string UserName { get; set; }
 
     [Required(ErrorMessage = "La contraseña es obligatoria.")]
