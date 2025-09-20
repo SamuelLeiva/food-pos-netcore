@@ -3,6 +3,7 @@ using API.Helpers;
 using API.Services.Interfaces;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -27,7 +28,7 @@ public class UserService : IUserService
         _passwordHasher = passwordHasher;
     }
 
-    public async Task<string> RegisterAsync(RegisterDto registerDto)
+    public async Task<ServiceResult> RegisterAsync(RegisterDto registerDto)
     {
         var usuario = new User
         {
@@ -50,23 +51,16 @@ public class UserService : IUserService
             var defaultRole = _unitOfWork.Roles
                                     .Find(u => u.Name == Authorization.default_role.ToString())
                                     .First();
-            try
-            {
+
                 usuario.Roles.Add(defaultRole);
                 _unitOfWork.Users.Add(usuario);
                 await _unitOfWork.SaveAsync();
 
-                return $"The user {registerDto.UserName} has been registered successfully.";
-            }
-            catch (Exception ex)
-            {
-                var message = ex.Message;
-                return $"Error: {message}";
-            }
+                return ServiceResult.Success();
         }
         else
         {
-            return $"Email: {registerDto.Email} is already registered.";
+            return ServiceResult.Failure($"The email {registerDto.Email} is already registered.");
         }
     }
 

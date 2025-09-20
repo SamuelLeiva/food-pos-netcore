@@ -1,4 +1,5 @@
 ﻿using API.Dtos.Users;
+using API.Helpers.Errors;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,10 +15,17 @@ public class UsersController : BaseApiController
     }
 
     [HttpPost("register")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult> RegisterAsync(RegisterDto model)
     {
         var result = await _userService.RegisterAsync(model);
-        return Ok(result);
+        if (!result.IsSuccess)
+        {
+            return Conflict(new ApiResponse(409, result.ErrorMessage));
+        }
+
+        return new CreatedResult(string.Empty ,new ApiResponse(201, "User registered successfully."));
     }
 
     [HttpPost("token")]
