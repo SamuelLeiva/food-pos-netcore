@@ -66,6 +66,18 @@ public class UsersController : BaseApiController
         return Ok(result.Data);
     }
 
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> Logout(LogoutDto logoutDto)
+    {
+        // Retrieve the refresh token from the request body.
+        var result = await _userService.RevokeRefreshTokenAsync(logoutDto.RefreshToken);
+
+        // Even if the token is already revoked or not found, we return a success status code
+        // to avoid leaking information about why the logout failed.
+        return Ok(new ApiResponse(200, "Logout successful"));
+    }
+
     private void SetRefreshTokenInCookie(string refreshToken)
     {
         var cookieOptions = new CookieOptions

@@ -156,6 +156,32 @@ public class UserService : IUserService
         return ServiceResult<UserDataDto>.Success(userDataDto);
     }
 
+    public async Task<ServiceResult> RevokeRefreshTokenAsync(string refreshToken)
+    {
+        var user = await _unitOfWork.Users.GetByRefreshTokenAsync(refreshToken);
+
+        // If no user is found with this token, or the token is already invalid, it's a successful "logout" from the server's perspective.
+        if (user == null)
+        {
+            return ServiceResult.Success();
+        }
+
+        var refreshTokenEntity = user.RefreshTokens.SingleOrDefault(t => t.Token == refreshToken);
+
+        // If the token is not found or already revoked, it's a successful "logout."
+        if (refreshTokenEntity == null || refreshTokenEntity.Revoked.HasValue)
+        {
+            return ServiceResult.Success();
+        }
+
+        // Revoke the token.
+        refreshTokenEntity.Revoked = DateTime.UtcNow;
+        _unitOfWork.Users.Update(user);
+        await _unitOfWork.SaveAsync();
+
+        return ServiceResult.Success();
+    }
+
 
     private RefreshToken CreateRefreshToken()
     {
