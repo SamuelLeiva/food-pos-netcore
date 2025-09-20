@@ -64,7 +64,7 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<UserDataDto> GetTokenAsync(LoginDto model)
+    public async Task<ServiceResult<UserDataDto>> GetTokenAsync(LoginDto model)
     {
         UserDataDto userDataDto = new UserDataDto();
         var user = await _unitOfWork.Users
@@ -74,7 +74,7 @@ public class UserService : IUserService
         {
             userDataDto.IsAuth = false;
             userDataDto.Message = $"There is no user with the username {model.UserName}.";
-            return userDataDto;
+            return ServiceResult<UserDataDto>.Failure(userDataDto.Message);
         }
 
         var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
@@ -106,14 +106,14 @@ public class UserService : IUserService
                 await _unitOfWork.SaveAsync();
             }
 
-            return userDataDto;
+            return ServiceResult<UserDataDto>.Success(userDataDto);
         }
         userDataDto.IsAuth = false;
         userDataDto.Message = $"Wrong credentials of user {user.UserName}.";
-        return userDataDto;
+        return ServiceResult<UserDataDto>.Failure(userDataDto.Message);
     }
 
-    public async Task<UserDataDto> RefreshTokenAsync(string refreshToken)
+    public async Task<ServiceResult<UserDataDto>> RefreshTokenAsync(string refreshToken)
     {
         var userDataDto = new UserDataDto();
 
@@ -124,7 +124,7 @@ public class UserService : IUserService
         {
             userDataDto.IsAuth = false;
             userDataDto.Message = $"The token does not belong to any user.";
-            return userDataDto;
+            return ServiceResult<UserDataDto>.Failure(userDataDto.Message);
         }
 
         var refreshTokenBd = user.RefreshTokens.Single(x => x.Token == refreshToken);
@@ -133,7 +133,7 @@ public class UserService : IUserService
         {
             userDataDto.IsAuth = false;
             userDataDto.Message = $"The token is not active.";
-            return userDataDto;
+            return ServiceResult<UserDataDto>.Failure(userDataDto.Message);
         }
         //Revocamos el Refresh Token actual y
         refreshTokenBd.Revoked = DateTime.UtcNow;
@@ -153,7 +153,7 @@ public class UserService : IUserService
                                         .ToList();
         userDataDto.RefreshToken = newRefreshToken.Token;
         userDataDto.RefreshTokenExpiration = newRefreshToken.Expires;
-        return userDataDto;
+        return ServiceResult<UserDataDto>.Success(userDataDto);
     }
 
 
@@ -201,7 +201,7 @@ public class UserService : IUserService
         return jwtSecurityToken;
     }
 
-    public async Task<string> AddRoleAsync(AddRoleDto model)
+    public async Task<ServiceResult> AddRoleAsync(AddRoleDto model)
     {
 
         var user = await _unitOfWork.Users
@@ -209,7 +209,7 @@ public class UserService : IUserService
 
         if (user == null)
         {
-            return $"There is no user with account {model.UserName}.";
+            return ServiceResult.Failure($"There is no user with account {model.UserName}.");
         }
 
 
@@ -235,12 +235,12 @@ public class UserService : IUserService
                     await _unitOfWork.SaveAsync();
                 }
 
-                return $"{model.Role} role added to the account {model.UserName} successfully.";
+                return ServiceResult.Success();
             }
 
-            return $"{model.Role} role not found.";
+            return ServiceResult.Failure($"{model.Role} role not found.");
         }
-        return $"Wrong credentials of user {user.UserName}.";
+        return ServiceResult.Failure($"Wrong credentials of user {user.UserName}.");
     }
 
 }

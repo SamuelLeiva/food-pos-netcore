@@ -6,7 +6,7 @@ namespace API.Services.Interfaces;
 public interface IUserService
 {
     Task<ServiceResult> RegisterAsync(RegisterDto model);
-    Task<UserDataDto> GetTokenAsync(LoginDto model);
-    Task<string> AddRoleAsync(AddRoleDto model);
-    Task<UserDataDto> RefreshTokenAsync(string refreshToken);
+    Task<ServiceResult<UserDataDto>> GetTokenAsync(LoginDto model);
+    Task<ServiceResult> AddRoleAsync(AddRoleDto model);
+    Task<ServiceResult<UserDataDto>> RefreshTokenAsync(string refreshToken);
 }

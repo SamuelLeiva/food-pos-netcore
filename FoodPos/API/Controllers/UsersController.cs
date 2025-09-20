@@ -8,7 +8,7 @@ namespace API.Controllers;
 
 public class UsersController : BaseApiController
 {
-    private readonly IUserService _userService; 
+    private readonly IUserService _userService;
     public UsersController(IUserService userService)
     {
         _userService = userService;
@@ -25,22 +25,34 @@ public class UsersController : BaseApiController
             return Conflict(new ApiResponse(409, result.ErrorMessage));
         }
 
-        return new CreatedResult(string.Empty ,new ApiResponse(201, "User registered successfully."));
+        return new CreatedResult(string.Empty, new ApiResponse(201, "User registered successfully."));
     }
 
     [HttpPost("token")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> GetTokenAsync(LoginDto model)
     {
         var result = await _userService.GetTokenAsync(model);
-        SetRefreshTokenInCookie(result.RefreshToken);
-        return Ok(result);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new ApiResponse(400, result.ErrorMessage));
+        }
+        SetRefreshTokenInCookie(result.Data.RefreshToken);
+        return Ok(result.Data);
     }
 
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [HttpPost("addrole")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> AddRoleAsync(AddRoleDto model)
     {
         var result = await _userService.AddRoleAsync(model);
+        if (!result.IsSuccess)
+        {
+            return BadRequest(new ApiResponse(400, result.ErrorMessage));
+        }
         return Ok(result);
     }
 
@@ -48,10 +60,10 @@ public class UsersController : BaseApiController
     public async Task<IActionResult> RefreshToken()
     {
         var refreshToken = Request.Cookies["refreshToken"];
-        var response = await _userService.RefreshTokenAsync(refreshToken);
-        if (!string.IsNullOrEmpty(response.RefreshToken))
-            SetRefreshTokenInCookie(response.RefreshToken);
-        return Ok(response);
+        var result = await _userService.RefreshTokenAsync(refreshToken);
+        if (!string.IsNullOrEmpty(result.Data.RefreshToken))
+            SetRefreshTokenInCookie(result.Data.RefreshToken);
+        return Ok(result.Data);
     }
 
     private void SetRefreshTokenInCookie(string refreshToken)
