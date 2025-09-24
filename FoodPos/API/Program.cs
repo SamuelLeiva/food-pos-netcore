@@ -1,4 +1,5 @@
 using API;
+using API.Dtos.Stripe;
 using API.Extensions;
 using API.Helpers.Errors;
 using AspNetCoreRateLimit;
@@ -24,10 +25,12 @@ builder.Logging.AddSerilog(logger);
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
 
 //Stripe config
-var stripeSettings = builder.Configuration.GetSection("StripeSettings").Get<StripeSettings>();
-builder.Services.AddSingleton(stripeSettings);
+builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection("StripeOptions"));
+// Get Stripe SecretKey to configure Stripe globally
+var stripeOptions = builder.Configuration.GetSection("StripeOptions").Get<StripeOptions>();
+StripeConfiguration.ApiKey = stripeOptions.SecretKey;
 
-StripeConfiguration.ApiKey = stripeSettings.SecretKey;
+//StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 
 //builder.Services.ConfigureRateLimiting();
 

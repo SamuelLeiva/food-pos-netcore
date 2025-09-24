@@ -35,6 +35,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IRoleService, RoleService>();
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICategoryService, CategoryService>();
+        services.AddScoped<IStripeService, StripeService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
     }
 
