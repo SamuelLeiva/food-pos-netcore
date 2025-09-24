@@ -30,156 +30,156 @@ public class UserService : IUserService
 
     public async Task<ServiceResult> RegisterAsync(RegisterDto registerDto)
     {
-        var usuario = new User
+        try
         {
-            Names = registerDto.Names,
-            FirstSurname = registerDto.FirstSurname,
-            LastSurname = registerDto.LastSurname,
-            Email = registerDto.Email,
-            UserName = registerDto.UserName
-        };
-
-        // encriptación de contraseña
-        usuario.Password = _passwordHasher.HashPassword(usuario, registerDto.Password);
-
-        var userExists = _unitOfWork.Users
+            var userExists = _unitOfWork.Users
                                     .Find(u => u.UserName.ToLower() == registerDto.UserName.ToLower() || u.Email.ToLower() == registerDto.Email.ToLower())
                                     .FirstOrDefault();
+            if (userExists != null)
+                return ServiceResult.Failure($"The email or username is already registered.");
 
-        if (userExists == null)
-        {
+            var user = new User
+            {
+                Names = registerDto.Names,
+                FirstSurname = registerDto.FirstSurname,
+                LastSurname = registerDto.LastSurname,
+                Email = registerDto.Email,
+                UserName = registerDto.UserName
+            };
+
+            // encriptación de contraseña
+            user.Password = _passwordHasher.HashPassword(user, registerDto.Password);
+
             var defaultRole = _unitOfWork.Roles
                                     .Find(u => u.Name == Authorization.default_role.ToString())
-                                    .First();
+                                    .FirstOrDefault();
 
-                usuario.Roles.Add(defaultRole);
-                _unitOfWork.Users.Add(usuario);
-                await _unitOfWork.SaveAsync();
+            if (defaultRole == null)
+                return ServiceResult.Failure("Default role not found. Please contact support.");
 
-                return ServiceResult.Success();
+            user.Roles.Add(defaultRole);
+            _unitOfWork.Users.Add(user);
+            await _unitOfWork.SaveAsync();
+
+            return ServiceResult.Success();
         }
-        else
+        catch (Exception ex)
         {
-            return ServiceResult.Failure($"The email {registerDto.Email} is already registered.");
+            return ServiceResult.Failure($"An unexpected error occurred during registration: {ex.Message}");
         }
     }
 
     public async Task<ServiceResult<UserDataDto>> GetTokenAsync(LoginDto model)
     {
-        UserDataDto userDataDto = new UserDataDto();
-        var user = await _unitOfWork.Users
-                    .GetByUserNameAsync(model.UserName);
-
-        if (user == null)
+        try
         {
-            userDataDto.IsAuth = false;
-            userDataDto.Message = $"There is no user with the username {model.UserName}.";
-            return ServiceResult<UserDataDto>.Failure(userDataDto.Message);
-        }
+            var user = await _unitOfWork.Users
+                                .GetByUserNameAsync(model.UserName);
 
-        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
+            if (user == null)
+                return ServiceResult<UserDataDto>.Failure($"There is no user with the username {model.UserName}.");
 
-        if (result == PasswordVerificationResult.Success)
-        {
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
+
+            if (result != PasswordVerificationResult.Success)
+                return ServiceResult<UserDataDto>.Failure($"Wrong credentials for user {model.UserName}.");
+
+            var userDataDto = new UserDataDto();
             userDataDto.IsAuth = true;
             JwtSecurityToken jwtSecurityToken = CreateJwtToken(user);
             userDataDto.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
             userDataDto.Email = user.Email;
             userDataDto.UserName = user.UserName;
-            userDataDto.Roles = user.Roles
-                                            .Select(u => u.Name)
-                                            .ToList();
+            userDataDto.Roles = user.Roles.Select(u => u.Name).ToList();
 
-            if (user.RefreshTokens.Any(a => a.IsActive))
+            var activeRefreshToken = user.RefreshTokens.FirstOrDefault(a => a.IsActive);
+            if (activeRefreshToken != null)
             {
-                var activeRefreshToken = user.RefreshTokens.Where(a => a.IsActive == true).FirstOrDefault();
                 userDataDto.RefreshToken = activeRefreshToken.Token;
                 userDataDto.RefreshTokenExpiration = activeRefreshToken.Expires;
             }
             else
             {
-                var refreshToken = CreateRefreshToken();
-                userDataDto.RefreshToken = refreshToken.Token;
-                userDataDto.RefreshTokenExpiration = refreshToken.Expires;
-                user.RefreshTokens.Add(refreshToken);
+                var newRefreshToken = CreateRefreshToken();
+                userDataDto.RefreshToken = newRefreshToken.Token;
+                userDataDto.RefreshTokenExpiration = newRefreshToken.Expires;
+                user.RefreshTokens.Add(newRefreshToken);
                 _unitOfWork.Users.Update(user);
                 await _unitOfWork.SaveAsync();
             }
 
             return ServiceResult<UserDataDto>.Success(userDataDto);
         }
-        userDataDto.IsAuth = false;
-        userDataDto.Message = $"Wrong credentials of user {user.UserName}.";
-        return ServiceResult<UserDataDto>.Failure(userDataDto.Message);
+        catch (Exception ex)
+        {
+            return ServiceResult<UserDataDto>.Failure($"An unexpected error occurred during login: {ex.Message}");
+        }
     }
 
     public async Task<ServiceResult<UserDataDto>> RefreshTokenAsync(string refreshToken)
     {
-        var userDataDto = new UserDataDto();
-
-        var user = await _unitOfWork.Users
-                        .GetByRefreshTokenAsync(refreshToken);
-
-        if (user == null)
+        try
         {
-            userDataDto.IsAuth = false;
-            userDataDto.Message = $"The token does not belong to any user.";
-            return ServiceResult<UserDataDto>.Failure(userDataDto.Message);
+            var user = await _unitOfWork.Users.GetByRefreshTokenAsync(refreshToken);
+
+            if (user == null)
+                return ServiceResult<UserDataDto>.Failure($"The token does not belong to any user.");
+
+            var refreshTokenBd = user.RefreshTokens.Single(x => x.Token == refreshToken);
+
+            if (!refreshTokenBd.IsActive)
+                return ServiceResult<UserDataDto>.Failure($"The token is not active.");
+
+            refreshTokenBd.Revoked = DateTime.UtcNow;
+            var newRefreshToken = CreateRefreshToken();
+            user.RefreshTokens.Add(newRefreshToken);
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveAsync();
+
+            var userDataDto = new UserDataDto();
+            userDataDto.IsAuth = true;
+            JwtSecurityToken jwtSecurityToken = CreateJwtToken(user);
+            userDataDto.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
+            userDataDto.Email = user.Email;
+            userDataDto.UserName = user.UserName;
+            userDataDto.Roles = user.Roles.Select(u => u.Name).ToList();
+            userDataDto.RefreshToken = newRefreshToken.Token;
+            userDataDto.RefreshTokenExpiration = newRefreshToken.Expires;
+
+            return ServiceResult<UserDataDto>.Success(userDataDto);
         }
-
-        var refreshTokenBd = user.RefreshTokens.Single(x => x.Token == refreshToken);
-
-        if (!refreshTokenBd.IsActive)
+        catch (Exception ex)
         {
-            userDataDto.IsAuth = false;
-            userDataDto.Message = $"The token is not active.";
-            return ServiceResult<UserDataDto>.Failure(userDataDto.Message);
+            return ServiceResult<UserDataDto>.Failure($"An unexpected error occurred during token refresh: {ex.Message}");
         }
-        //Revocamos el Refresh Token actual y
-        refreshTokenBd.Revoked = DateTime.UtcNow;
-        //generamos un nuevo Refresh Token y lo guardamos en la Base de Datos
-        var newRefreshToken = CreateRefreshToken();
-        user.RefreshTokens.Add(newRefreshToken);
-        _unitOfWork.Users.Update(user);
-        await _unitOfWork.SaveAsync();
-        //Generamos un nuevo Json Web Token
-        userDataDto.IsAuth = true;
-        JwtSecurityToken jwtSecurityToken = CreateJwtToken(user);
-        userDataDto.Token = new JwtSecurityTokenHandler().WriteToken(jwtSecurityToken);
-        userDataDto.Email = user.Email;
-        userDataDto.UserName = user.UserName;
-        userDataDto.Roles = user.Roles
-                                        .Select(u => u.Name)
-                                        .ToList();
-        userDataDto.RefreshToken = newRefreshToken.Token;
-        userDataDto.RefreshTokenExpiration = newRefreshToken.Expires;
-        return ServiceResult<UserDataDto>.Success(userDataDto);
     }
 
     public async Task<ServiceResult> RevokeRefreshTokenAsync(string refreshToken)
     {
-        var user = await _unitOfWork.Users.GetByRefreshTokenAsync(refreshToken);
-
-        // If no user is found with this token, or the token is already invalid, it's a successful "logout" from the server's perspective.
-        if (user == null)
+        try
         {
+            var user = await _unitOfWork.Users.GetByRefreshTokenAsync(refreshToken);
+
+            // Returning success even if the token is not found is a good security practice
+            // to prevent leaking information about valid/invalid tokens.
+            if (user == null)
+                return ServiceResult.Success();
+
+            var refreshTokenEntity = user.RefreshTokens.SingleOrDefault(t => t.Token == refreshToken);
+
+            if (refreshTokenEntity == null || refreshTokenEntity.Revoked.HasValue)
+                return ServiceResult.Success();
+
+            refreshTokenEntity.Revoked = DateTime.UtcNow;
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveAsync();
+
             return ServiceResult.Success();
         }
-
-        var refreshTokenEntity = user.RefreshTokens.SingleOrDefault(t => t.Token == refreshToken);
-
-        // If the token is not found or already revoked, it's a successful "logout."
-        if (refreshTokenEntity == null || refreshTokenEntity.Revoked.HasValue)
+        catch (Exception ex)
         {
-            return ServiceResult.Success();
+            return ServiceResult.Failure($"An unexpected error occurred while revoking the token: {ex.Message}");
         }
-
-        // Revoke the token.
-        refreshTokenEntity.Revoked = DateTime.UtcNow;
-        _unitOfWork.Users.Update(user);
-        await _unitOfWork.SaveAsync();
-
-        return ServiceResult.Success();
     }
 
 
@@ -230,43 +230,34 @@ public class UserService : IUserService
     public async Task<ServiceResult> AddRoleAsync(AddRoleDto model)
     {
 
-        var user = await _unitOfWork.Users
-                    .GetByUserNameAsync(model.UserName);
-
-        if (user == null)
+        try
         {
-            return ServiceResult.Failure($"There is no user with account {model.UserName}.");
+            var user = await _unitOfWork.Users.GetByUserNameAsync(model.UserName);
+            if (user == null)
+                return ServiceResult.Failure($"There is no user with the username {model.UserName}.");
+
+            var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
+            if (result != PasswordVerificationResult.Success)
+                return ServiceResult.Failure($"Wrong credentials for user {model.UserName}.");
+
+            var rolExists = _unitOfWork.Roles.Find(u => u.Name.ToLower() == model.Role.ToLower()).FirstOrDefault();
+            if (rolExists == null)
+                return ServiceResult.Failure($"{model.Role} role not found.");
+
+            var userHasRole = user.Roles.Any(u => u.Id == rolExists.Id);
+            if (userHasRole)
+                return ServiceResult.Failure($"User {model.UserName} already has the role {model.Role}.");
+
+            user.Roles.Add(rolExists);
+            _unitOfWork.Users.Update(user);
+            await _unitOfWork.SaveAsync();
+
+            return ServiceResult.Success();
         }
-
-
-        var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
-
-        if (result == PasswordVerificationResult.Success)
+        catch (Exception ex)
         {
-
-
-            var rolExists = _unitOfWork.Roles
-                                        .Find(u => u.Name.ToLower() == model.Role.ToLower())
-                                        .FirstOrDefault();
-
-            if (rolExists != null)
-            {
-                var userHasRole = user.Roles
-                                            .Any(u => u.Id == rolExists.Id);
-
-                if (userHasRole == false)
-                {
-                    user.Roles.Add(rolExists);
-                    _unitOfWork.Users.Update(user);
-                    await _unitOfWork.SaveAsync();
-                }
-
-                return ServiceResult.Success();
-            }
-
-            return ServiceResult.Failure($"{model.Role} role not found.");
+            return ServiceResult.Failure($"An unexpected error occurred while adding the role: {ex.Message}");
         }
-        return ServiceResult.Failure($"Wrong credentials of user {user.UserName}.");
     }
 
 }

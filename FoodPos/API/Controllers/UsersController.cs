@@ -20,62 +20,76 @@ public class UsersController : BaseApiController
     public async Task<ActionResult> RegisterAsync(RegisterDto model)
     {
         var result = await _userService.RegisterAsync(model);
-        if (!result.IsSuccess)
-        {
-            return Conflict(new ApiResponse(409, result.ErrorMessage));
-        }
+        if (result.IsSuccess)
+            return new CreatedResult(string.Empty, new ApiResponse(201, "User registered successfully."));
 
-        return new CreatedResult(string.Empty, new ApiResponse(201, "User registered successfully."));
+        return Conflict(new ApiResponse(409, result.ErrorMessage));
     }
 
     [HttpPost("token")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> GetTokenAsync(LoginDto model)
+    public async Task<ActionResult<UserDataDto>> GetTokenAsync(LoginDto model)
     {
         var result = await _userService.GetTokenAsync(model);
-        if (!result.IsSuccess)
+        if (result.IsSuccess)
         {
-            return BadRequest(new ApiResponse(400, result.ErrorMessage));
+            SetRefreshTokenInCookie(result.Data.RefreshToken);
+            return Ok(result.Data);
         }
-        SetRefreshTokenInCookie(result.Data.RefreshToken);
-        return Ok(result.Data);
+        return BadRequest(new ApiResponse(400, result.ErrorMessage));
     }
 
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     [HttpPost("addrole")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> AddRoleAsync(AddRoleDto model)
     {
         var result = await _userService.AddRoleAsync(model);
-        if (!result.IsSuccess)
-        {
-            return BadRequest(new ApiResponse(400, result.ErrorMessage));
-        }
-        return Ok(result);
+        if (result.IsSuccess)
+            return Ok(new ApiResponse(200, "Role added successfully."));
+        // Podemos ser más específicos si el error es de tipo "not found"
+
+        if (result.ErrorMessage.Contains("not found"))
+            return NotFound(new ApiResponse(404, result.ErrorMessage));
+
+        return BadRequest(new ApiResponse(400, result.ErrorMessage));
     }
 
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken()
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult<UserDataDto>> RefreshToken()
     {
         var refreshToken = Request.Cookies["refreshToken"];
         var result = await _userService.RefreshTokenAsync(refreshToken);
-        if (!string.IsNullOrEmpty(result.Data.RefreshToken))
+
+        if (result.IsSuccess)
+        {
             SetRefreshTokenInCookie(result.Data.RefreshToken);
-        return Ok(result.Data);
+            return Ok(result.Data);
+        }
+
+        return BadRequest(new ApiResponse(400, result.ErrorMessage));
     }
 
     [HttpPost("logout")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    public async Task<ActionResult> Logout(LogoutDto logoutDto)
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<ActionResult> Logout([FromBody] LogoutDto logoutDto)
     {
-        // Retrieve the refresh token from the request body.
         var result = await _userService.RevokeRefreshTokenAsync(logoutDto.RefreshToken);
 
-        // Even if the token is already revoked or not found, we return a success status code
-        // to avoid leaking information about why the logout failed.
-        return Ok(new ApiResponse(200, "Logout successful"));
+        // No importa si el resultado es éxito o fallo, el logout es exitoso desde la perspectiva del cliente.
+        // Esto previene que un atacante descubra si un token es válido o no.
+        if (result.IsSuccess)
+        {
+            return Ok(new ApiResponse(200, "Logout successful."));
+        }
+
+        return Ok(new ApiResponse(200, "Logout successful."));
     }
 
     private void SetRefreshTokenInCookie(string refreshToken)
