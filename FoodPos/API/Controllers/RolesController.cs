@@ -4,6 +4,7 @@ using API.Services.Interfaces;
 using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
+using Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,15 +24,14 @@ public class RolesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<Role>> Post(CreateRoleDto roleDto)
+    public async Task<ActionResult<Role>> Post(RoleDto roleDto)
     {
         var result = await _roleService.CreateRoleAsync(roleDto);
-        if (!result.IsSuccess)
-        {
-            return Conflict(new ApiResponse(409, result.ErrorMessage));
-        }
+        if (result.IsSuccess)
+            return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, result.Data);
 
-        return CreatedAtAction(nameof(Post), result.Data);
+        return Conflict(new ApiResponse(409, result.ErrorMessage));
+
     }
 
     [HttpDelete("{id}")]
@@ -40,11 +40,23 @@ public class RolesController : BaseApiController
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _roleService.DeleteRoleAsync(id);
-        if (!result.IsSuccess)
-        {
-            return NotFound(new ApiResponse(404, result.ErrorMessage));
-        }
+        if (result.IsSuccess)
+            return NoContent();
 
-        return NoContent();
+        return NotFound(new ApiResponse(404, result.ErrorMessage));
+
+
+    }
+
+    [HttpGet("{id}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<Role>> Get(int id)
+    {
+        var result = await _roleService.GetRoleByIdAsync(id);
+        if (result.IsSuccess)
+            return Ok(result.Data);
+
+        return NotFound(new ApiResponse(404, result.ErrorMessage));
     }
 }

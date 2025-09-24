@@ -18,41 +18,72 @@ public class RoleService : IRoleService
         _mapper = mapper;
     }
 
-    public async Task<ServiceResult<Role>> CreateRoleAsync(CreateRoleDto roleDto)
+    public async Task<ServiceResult<Role>> CreateRoleAsync(RoleDto roleDto)
     {
-        var roleExists = _unitOfWork.Roles
-            .Find(r => r.Name.ToLower() == roleDto.Name.ToLower())
-            .FirstOrDefault();
-
-        if (roleExists != null)
+        try
         {
-            return ServiceResult<Role>.Failure("The role with the same name already exists.");
+            var roleExists = _unitOfWork.Roles
+                .Find(r => r.Name.ToLower() == roleDto.Name.ToLower())
+                .FirstOrDefault();
+
+            if (roleExists != null)
+            {
+                return ServiceResult<Role>.Failure("The role with the same name already exists.");
+            }
+
+            var role = _mapper.Map<Role>(roleDto);
+            _unitOfWork.Roles.Add(role);
+            await _unitOfWork.SaveAsync();
+
+            if (role.Id == 0) // Checks if the role was actually added and assigned an ID
+            {
+                return ServiceResult<Role>.Failure("Failed to create role. No ID was assigned.");
+            }
+
+            return ServiceResult<Role>.Success(role);
         }
-
-        var role = _mapper.Map<Role>(roleDto);
-
-        _unitOfWork.Roles.Add(role);
-        await _unitOfWork.SaveAsync();
-
-        if (role == null)
+        catch (Exception ex)
         {
-            return ServiceResult<Role>.Failure("Failed to create role.");
+            return ServiceResult<Role>.Failure($"An error occurred while creating the role: {ex.Message}");
         }
-
-        return ServiceResult<Role>.Success(role);
     }
 
     public async Task<ServiceResult> DeleteRoleAsync(int id)
     {
-        var role = await _unitOfWork.Roles.GetByIdAsync(id);
-        if (role == null)
+        try
         {
-            return ServiceResult.Failure("The role requested does not exist.");
+            var role = await _unitOfWork.Roles.GetByIdAsync(id);
+            if (role == null)
+            {
+                return ServiceResult.Failure("The role requested does not exist.");
+            }
+
+            _unitOfWork.Roles.Remove(role);
+            await _unitOfWork.SaveAsync();
+
+            return ServiceResult.Success();
         }
+        catch (Exception ex)
+        {
+            return ServiceResult.Failure($"An error occurred while deleting the role: {ex.Message}");
+        }
+    }
 
-        _unitOfWork.Roles.Remove(role);
-        await _unitOfWork.SaveAsync();
+    public async Task<ServiceResult<RoleDto>> GetRoleByIdAsync(int id)
+    {
+        try
+        {
+            var role = _unitOfWork.Roles.GetByIdAsync(id);
+            if(role == null)
+                return ServiceResult<RoleDto>.Failure("The role requested does not exist.");
 
-        return ServiceResult.Success();
+            var roleDto = _mapper.Map<RoleDto>(role);
+
+            return ServiceResult<RoleDto>.Success(roleDto);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<RoleDto>.Failure($"An unexpected error ocurred while retrieving the product: {ex.Message}");
+        }
     }
 }

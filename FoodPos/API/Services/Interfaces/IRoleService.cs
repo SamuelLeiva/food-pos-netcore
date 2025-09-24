@@ -6,6 +6,7 @@ namespace API.Services.Interfaces;
 
 public interface IRoleService
 {
-    Task<ServiceResult<Role>> CreateRoleAsync(CreateRoleDto roleDto);
+    Task<ServiceResult<Role>> CreateRoleAsync(RoleDto roleDto);
     Task<ServiceResult> DeleteRoleAsync(int id);
+    Task<ServiceResult<RoleDto>> GetRoleByIdAsync(int id);
 }

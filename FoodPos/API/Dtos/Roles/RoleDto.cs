@@ -2,7 +2,7 @@
 
 namespace API.Dtos.Roles;
 
-public class CreateRoleDto
+public class RoleDto
 {
     [Required(ErrorMessage = "Name can't be empty.")]
     [MaxLength(50, ErrorMessage = "Name can't be longer than 50 characters.")]

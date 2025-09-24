@@ -24,7 +24,7 @@ public class MappingProfiles : Profile
             .ReverseMap()
             .ForMember(src => src.Category, dest => dest.Ignore());
 
-        CreateMap<Role, CreateRoleDto>()
+        CreateMap<Role, RoleDto>()
             .ReverseMap();
 
         CreateMap<Category, CategoryDto>()

@@ -46,7 +46,7 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred: {ex.Message}");
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while retrieving the product: {ex.Message}");
         }
     }
 
@@ -74,7 +74,7 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred: {ex.Message}");
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while creating the product: {ex.Message}");
         }
     }
 
@@ -106,7 +106,7 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred: {ex.Message}");
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while updating the product: {ex.Message}");
         }
     }
     public async Task<ServiceResult> DeleteProductAsync(int id)
@@ -125,7 +125,7 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult.Failure($"An unexpected error occurred: {ex.Message}");
+            return ServiceResult.Failure($"An unexpected error occurred while deleting the product: {ex.Message}");
         }
     }
 
@@ -140,7 +140,7 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult<Pager<ProductDto>>.Failure($"An unexpected error occurred: {ex.Message}");
+            return ServiceResult<Pager<ProductDto>>.Failure($"An unexpected error occurred while retrieving the products: {ex.Message}");
         }
     }
 }
