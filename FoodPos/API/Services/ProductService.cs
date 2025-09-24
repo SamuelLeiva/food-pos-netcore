@@ -18,88 +18,129 @@ public class ProductService : IProductService
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
-    public async Task<Pager<ProductDto>> GetProductsAsync(Params productParams)
+    public async Task<ServiceResult<Pager<ProductDto>>> GetProductsAsync(Params productParams)
     {
-        var result = await _unitOfWork.Products.GetAllAsync(productParams.PageIndex, productParams.PageSize, productParams.Search);
-        var productsListDto = _mapper.Map<List<ProductDto>>(result.registers);
-        return new Pager<ProductDto>(productsListDto, result.totalRegisters, productParams.PageIndex, productParams.PageSize, productParams.Search);
+        try
+        {
+            var result = await _unitOfWork.Products.GetAllAsync(productParams.PageIndex, productParams.PageSize, productParams.Search);
+            var productsListDto = _mapper.Map<List<ProductDto>>(result.registers);
+            var pager = new Pager<ProductDto>(productsListDto, result.totalRegisters, productParams.PageIndex, productParams.PageSize, productParams.Search);
+            return ServiceResult<Pager<ProductDto>>.Success(pager);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<Pager<ProductDto>>.Failure($"An unexpected error occurred while retrieving products: {ex.Message}");
+        }
     }
     public async Task<ServiceResult<ProductDto>> GetProductByIdAsync(int id)
     {
-        var product = await _unitOfWork.Products.GetByIdAsync(id);
-        if (product == null)
+        try
         {
-            return ServiceResult<ProductDto>.Failure("The product requested does not exist.");
+            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            if (product == null)
+            {
+                return ServiceResult<ProductDto>.Failure("The product requested does not exist.");
+            }
+            var productDto = _mapper.Map<ProductDto>(product);
+            return ServiceResult<ProductDto>.Success(productDto);
         }
-        var productDto = _mapper.Map<ProductDto>(product);
-        return ServiceResult<ProductDto>.Success(productDto);
+        catch (Exception ex)
+        {
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred: {ex.Message}");
+        }
     }
+
     public async Task<ServiceResult<ProductDto>> CreateProductAsync(ProductAddUpdateDto productDto)
     {
-        var productExists = _unitOfWork.Products
-            .Find(p => p.Name.ToLower() == productDto.Name.ToLower())
-            .FirstOrDefault();
-
-        if (productExists != null)
+        try
         {
-            return ServiceResult<ProductDto>.Failure("A product with the same name already exists.");
+            var productExists = _unitOfWork.Products
+                .Find(p => p.Name.ToLower() == productDto.Name.ToLower())
+                .FirstOrDefault();
+
+            if (productExists != null)
+            {
+                return ServiceResult<ProductDto>.Failure("A product with the same name already exists.");
+            }
+
+            var product = _mapper.Map<Product>(productDto);
+            _unitOfWork.Products.Add(product);
+            await _unitOfWork.SaveAsync();
+
+            await _unitOfWork.Products.GetByIdAsync(product.Id);
+
+            var createdProductDto = _mapper.Map<ProductDto>(product);
+            return ServiceResult<ProductDto>.Success(createdProductDto);
         }
-
-        var product = _mapper.Map<Product>(productDto);
-        _unitOfWork.Products.Add(product);
-        await _unitOfWork.SaveAsync();
-
-        await _unitOfWork.Products.GetByIdAsync(product.Id);
-
-        var createdProductDto = _mapper.Map<ProductDto>(product);
-
-        return ServiceResult<ProductDto>.Success(createdProductDto);
+        catch (Exception ex)
+        {
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred: {ex.Message}");
+        }
     }
+
     public async Task<ServiceResult<ProductDto>> UpdateProductAsync(int id, ProductAddUpdateDto productDto)
     {
-        var productDb = await _unitOfWork.Products.GetByIdAsync(id);
-        if (productDb == null)
+        try
         {
-            return ServiceResult<ProductDto>.Failure("The product requested does not exist.");
+            var productDb = await _unitOfWork.Products.GetByIdAsync(id);
+            if (productDb == null)
+            {
+                return ServiceResult<ProductDto>.Failure("The product requested does not exist.");
+            }
+
+            var productExists = _unitOfWork.Products
+                .Find(p => p.Name.ToLower() == productDto.Name.ToLower() && p.Id != id)
+                .FirstOrDefault();
+
+            if (productExists != null)
+            {
+                return ServiceResult<ProductDto>.Failure("Another product with the same name already exists.");
+            }
+
+            _mapper.Map(productDto, productDb);
+            productDb.UpdatedAt = DateTime.Now;
+            await _unitOfWork.SaveAsync();
+
+            var updatedProductDto = _mapper.Map<ProductDto>(productDb);
+            return ServiceResult<ProductDto>.Success(updatedProductDto);
         }
-
-        var productExists = _unitOfWork.Products
-            .Find(p => p.Name.ToLower() == productDto.Name.ToLower() && p.Id != id)
-            .FirstOrDefault();
-
-        if (productExists != null)
+        catch (Exception ex)
         {
-            return ServiceResult<ProductDto>.Failure("Another product with the same name already exists.");
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred: {ex.Message}");
         }
-
-        // Mapea los valores del DTO de entrada a la entidad de la base de datos
-        _mapper.Map(productDto, productDb);
-        productDb.UpdatedAt = DateTime.Now;
-        await _unitOfWork.SaveAsync();
-
-        // Mapea la entidad actualizada a un DTO de respuesta antes de retornarlo
-        var updatedProductDto = _mapper.Map<ProductDto>(productDb);
-
-        return ServiceResult<ProductDto>.Success(updatedProductDto);
     }
     public async Task<ServiceResult> DeleteProductAsync(int id)
     {
-        var product = await _unitOfWork.Products.GetByIdAsync(id);
-        if (product == null)
+        try
         {
-            return ServiceResult.Failure("The product requested does not exist.");
+            var product = await _unitOfWork.Products.GetByIdAsync(id);
+            if (product == null)
+            {
+                return ServiceResult.Failure("The product requested does not exist.");
+            }
+
+            _unitOfWork.Products.Remove(product);
+            await _unitOfWork.SaveAsync();
+            return ServiceResult.Success();
         }
-
-        _unitOfWork.Products.Remove(product);
-        await _unitOfWork.SaveAsync();
-
-        return ServiceResult.Success();
+        catch (Exception ex)
+        {
+            return ServiceResult.Failure($"An unexpected error occurred: {ex.Message}");
+        }
     }
 
-    public async Task<Pager<ProductDto>> GetProductsByCategoryAsync(int categoryId, Params productParams)
+    public async Task<ServiceResult<Pager<ProductDto>>> GetProductsByCategoryAsync(int categoryId, Params productParams)
     {
-        var result = await _unitOfWork.Products.GetProductsByCategoryIdAsync(categoryId, productParams.PageIndex, productParams.PageSize, productParams.Search);
-        var productsListDto = _mapper.Map<List<ProductDto>>(result.registers);
-        return new Pager<ProductDto>(productsListDto, result.totalRegisters, productParams.PageIndex, productParams.PageSize, productParams.Search);
+        try
+        {
+            var result = await _unitOfWork.Products.GetProductsByCategoryIdAsync(categoryId, productParams.PageIndex, productParams.PageSize, productParams.Search);
+            var productsListDto = _mapper.Map<List<ProductDto>>(result.registers);
+            var pager = new Pager<ProductDto>(productsListDto, result.totalRegisters, productParams.PageIndex, productParams.PageSize, productParams.Search);
+            return ServiceResult<Pager<ProductDto>>.Success(pager);
+        }
+        catch (Exception ex)
+        {
+            return ServiceResult<Pager<ProductDto>>.Failure($"An unexpected error occurred: {ex.Message}");
+        }
     }
 }

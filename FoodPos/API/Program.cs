@@ -3,9 +3,11 @@ using API.Extensions;
 using API.Helpers.Errors;
 using AspNetCoreRateLimit;
 using AutoMapper;
+using Core.Configuration;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
+using Stripe;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +22,12 @@ builder.Logging.AddSerilog(logger);
 
 //AutoMapper
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
+
+//Stripe config
+var stripeSettings = builder.Configuration.GetSection("StripeSettings").Get<StripeSettings>();
+builder.Services.AddSingleton(stripeSettings);
+
+StripeConfiguration.ApiKey = stripeSettings.SecretKey;
 
 //builder.Services.ConfigureRateLimiting();
 

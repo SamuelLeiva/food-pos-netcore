@@ -22,7 +22,10 @@ public class CategoriesController : BaseApiController
     public async Task<ActionResult<List<CategoryDto>>> Get()
     {
         var result = await _categoryService.GetCategoriesAsync();
-        return Ok(result);
+        if (result.IsSuccess)
+            return Ok(result.Data);
+
+        return BadRequest(new ApiResponse(400, result.ErrorMessage));
     }
 
     [HttpGet("paginated")]
@@ -31,7 +34,10 @@ public class CategoriesController : BaseApiController
     public async Task<ActionResult<Pager<CategoryDto>>> Get([FromQuery] Params categoryParams)
     {
         var result = await _categoryService.GetCategoriesPaginatedAsync(categoryParams);
-        return Ok(result);
+        if (result.IsSuccess)
+            return Ok(result.Data);
+
+        return BadRequest(new ApiResponse(400, result.ErrorMessage));
     }
 
     [HttpGet("{id}")]
@@ -41,12 +47,11 @@ public class CategoriesController : BaseApiController
     public async Task<ActionResult<CategoryDto>> Get(int id)
     {
         var result = await _categoryService.GetCategoryByIdAsync(id);
-        if (!result.IsSuccess)
-        {
-            return NotFound(new ApiResponse(404, result.ErrorMessage));
-        }
 
-        return Ok(result.Data);
+        if (result.IsSuccess)
+            return Ok(result.Data);
+
+        return NotFound(new ApiResponse(404, result.ErrorMessage));
     }
 
     [HttpPost]
@@ -57,12 +62,11 @@ public class CategoriesController : BaseApiController
     public async Task<ActionResult<Category>> Post(CategoryAddUpdateDto categoryDto)
     {
         var result = await _categoryService.CreateCategoryAsync(categoryDto);
-        if (!result.IsSuccess)
-        {
-            return Conflict(new ApiResponse(409, result.ErrorMessage));
-        }
 
-        return CreatedAtAction(nameof(Post), result.Data);
+        if (result.IsSuccess)
+            return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, result.Data);
+
+        return Conflict(new ApiResponse(409, result.ErrorMessage));
     }
 
     [HttpPut("{id}")]
@@ -74,12 +78,16 @@ public class CategoriesController : BaseApiController
     public async Task<ActionResult<CategoryDto>> Put(int id, [FromBody] CategoryAddUpdateDto categoryDto)
     {
         var result = await _categoryService.UpdateCategoryAsync(id, categoryDto);
-        if (!result.IsSuccess)
+
+        if (result.IsSuccess)
+            return Ok(result.Data);
+
+        // Dependiendo del error, retorna un 404 o un 409
+        if (result.ErrorMessage.Contains("does not exist"))
         {
             return NotFound(new ApiResponse(404, result.ErrorMessage));
         }
-
-        return Ok(result.Data);
+        return Conflict(new ApiResponse(409, result.ErrorMessage));
     }
 
     [HttpDelete("{id}")]
@@ -89,12 +97,10 @@ public class CategoriesController : BaseApiController
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _categoryService.DeleteCategoryAsync(id);
-        if (!result.IsSuccess)
-        {
-            return NotFound(new ApiResponse(404, result.ErrorMessage));
-        }
+        if (result.IsSuccess)
+            return NoContent(); // Retorna 204 si la operación fue exitosa
 
-        return NoContent();
+        return NotFound(new ApiResponse(404, result.ErrorMessage));
     }
 
 
