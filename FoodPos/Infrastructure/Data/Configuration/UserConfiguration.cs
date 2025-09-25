@@ -48,6 +48,11 @@ public class UserConfiguration
                 .WithOne(rt => rt.User)
                 .HasForeignKey(rt => rt.UserId);
 
+            builder
+                .HasMany(u => u.Orders)
+                .WithOne(o => o.User)
+                .HasForeignKey(o => o.UserId);
+
         }
     }
 
