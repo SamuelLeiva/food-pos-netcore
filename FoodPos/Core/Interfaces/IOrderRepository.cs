@@ -9,5 +9,5 @@ namespace Core.Interfaces;
 
 public interface IOrderRepository : IGenericRepository<Order>
 {
-    Task<IEnumerable<Order>> GetOrdersByUserId(int userId);
+    Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId);
 }
