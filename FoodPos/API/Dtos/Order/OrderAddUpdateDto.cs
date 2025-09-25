@@ -1,0 +1,14 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace API.Dtos.Order;
+
+public class OrderAddUpdateDto
+{
+    [Required(ErrorMessage = "The OrderItems list cannot be empty.")]
+    [MinLength(1, ErrorMessage = "An order must contain at least one item.")]
+    public List<OrderItemAddUpdateDto> OrderItems { get; set; }
+
+    [Required(ErrorMessage = "Receipt email is required.")]
+    [EmailAddress(ErrorMessage = "The email format is invalid.")]
+    public string ReceiptEmail { get; set; }
+}
