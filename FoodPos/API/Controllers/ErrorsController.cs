@@ -1,4 +1,4 @@
-﻿using API.Helpers.Errors;
+﻿using API.Helpers.Response;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers;

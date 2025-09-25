@@ -5,5 +5,5 @@ namespace API.Services.Interfaces;
 
 public interface IStripeService
 {
-    Task<ServiceResult<string>> CreatePaymentIntentAsync(long amount);
+    Task<ServiceResult<string>> CreatePaymentIntentAsync(PaymentIntentDto paymentIntentDto);
 }

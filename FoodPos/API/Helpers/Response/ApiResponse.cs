@@ -1,14 +1,10 @@
-﻿namespace API.Helpers.Errors;
+﻿namespace API.Helpers.Response;
 
+// Clase no genérica para errores
 public class ApiResponse
 {
     public int StatusCode { get; set; }
     public string Message { get; set; }
-
-    public ApiResponse()
-    {
-
-    }
 
     public ApiResponse(int statusCode, string message = null)
     {
@@ -27,5 +23,20 @@ public class ApiResponse
             500 => "Server error. Contact the administrator.",
             _ => "Unknown error."
         };
+    }
+}
+
+// Clase genérica para respuestas exitosas con datos
+public class ApiResponse<T>
+{
+    public int StatusCode { get; set; }
+    public string Message { get; set; }
+    public T Data { get; set; }
+
+    public ApiResponse(int statusCode, string message = null, T data = default)
+    {
+        StatusCode = statusCode;
+        Message = message;
+        Data = data;
     }
 }

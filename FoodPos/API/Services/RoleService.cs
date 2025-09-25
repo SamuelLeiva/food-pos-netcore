@@ -1,4 +1,5 @@
-﻿using API.Dtos.Roles;
+﻿using API.Dtos.Products;
+using API.Dtos.Roles;
 using API.Services.Interfaces;
 using AutoMapper;
 using Core.Entities;
@@ -18,7 +19,7 @@ public class RoleService : IRoleService
         _mapper = mapper;
     }
 
-    public async Task<ServiceResult<Role>> CreateRoleAsync(RoleDto roleDto)
+    public async Task<ServiceResult<RoleDto>> CreateRoleAsync(RoleDto roleDto)
     {
         try
         {
@@ -28,23 +29,21 @@ public class RoleService : IRoleService
 
             if (roleExists != null)
             {
-                return ServiceResult<Role>.Failure("The role with the same name already exists.");
+                return ServiceResult<RoleDto>.Failure("The role with the same name already exists.");
             }
 
             var role = _mapper.Map<Role>(roleDto);
             _unitOfWork.Roles.Add(role);
             await _unitOfWork.SaveAsync();
 
-            if (role.Id == 0) // Checks if the role was actually added and assigned an ID
-            {
-                return ServiceResult<Role>.Failure("Failed to create role. No ID was assigned.");
-            }
+            await _unitOfWork.Products.GetByIdAsync(role.Id);
 
-            return ServiceResult<Role>.Success(role);
+            var createdRoleDto = _mapper.Map<RoleDto>(role);
+            return ServiceResult<RoleDto>.Success(createdRoleDto);
         }
         catch (Exception ex)
         {
-            return ServiceResult<Role>.Failure($"An error occurred while creating the role: {ex.Message}");
+            return ServiceResult<RoleDto>.Failure($"An error occurred while creating the role: {ex.Message}");
         }
     }
 
@@ -73,7 +72,7 @@ public class RoleService : IRoleService
     {
         try
         {
-            var role = _unitOfWork.Roles.GetByIdAsync(id);
+            var role = await _unitOfWork.Roles.GetByIdAsync(id);
             if(role == null)
                 return ServiceResult<RoleDto>.Failure("The role requested does not exist.");
 

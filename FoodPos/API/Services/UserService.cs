@@ -206,7 +206,7 @@ public class UserService : IUserService
         var roleClaims = new List<Claim>();
         foreach (var role in roles)
         {
-            roleClaims.Add(new Claim("roles", role.Name));
+            roleClaims.Add(new Claim(ClaimTypes.Role, role.Name));
         }
         var claims = new[]
         {

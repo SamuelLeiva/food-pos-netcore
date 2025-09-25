@@ -1,6 +1,7 @@
 ﻿using API.Dtos.Categories;
 using API.Helpers;
 using API.Helpers.Errors;
+using API.Helpers.Response;
 using API.Services.Interfaces;
 using Core.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -23,7 +24,7 @@ public class CategoriesController : BaseApiController
     {
         var result = await _categoryService.GetCategoriesAsync();
         if (result.IsSuccess)
-            return Ok(result.Data);
+            return Ok(new ApiResponse<List<CategoryDto>>(200, "Categories retrieved successfully.", result.Data));
 
         return BadRequest(new ApiResponse(400, result.ErrorMessage));
     }
@@ -35,7 +36,7 @@ public class CategoriesController : BaseApiController
     {
         var result = await _categoryService.GetCategoriesPaginatedAsync(categoryParams);
         if (result.IsSuccess)
-            return Ok(result.Data);
+            return Ok(new ApiResponse<Pager<CategoryDto>>(200, "Categories paginated successfully.", result.Data));
 
         return BadRequest(new ApiResponse(400, result.ErrorMessage));
     }
@@ -49,7 +50,7 @@ public class CategoriesController : BaseApiController
         var result = await _categoryService.GetCategoryByIdAsync(id);
 
         if (result.IsSuccess)
-            return Ok(result.Data);
+            return Ok(new ApiResponse<CategoryDto>(200, "Category retrieved successfully.", result.Data));
 
         return NotFound(new ApiResponse(404, result.ErrorMessage));
     }
@@ -59,12 +60,12 @@ public class CategoriesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<Category>> Post(CategoryAddUpdateDto categoryDto)
+    public async Task<ActionResult<CategoryDto>> Post(CategoryAddUpdateDto categoryDto)
     {
         var result = await _categoryService.CreateCategoryAsync(categoryDto);
 
         if (result.IsSuccess)
-            return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, result.Data);
+            return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, new ApiResponse<CategoryDto>(201, "Category created successfully.", result.Data));
 
         return Conflict(new ApiResponse(409, result.ErrorMessage));
     }
@@ -80,7 +81,7 @@ public class CategoriesController : BaseApiController
         var result = await _categoryService.UpdateCategoryAsync(id, categoryDto);
 
         if (result.IsSuccess)
-            return Ok(result.Data);
+            return Ok(new ApiResponse<CategoryDto>(200, "Category updated successfully.", result.Data));
 
         // Dependiendo del error, retorna un 404 o un 409
         if (result.ErrorMessage.Contains("does not exist"))
@@ -98,7 +99,7 @@ public class CategoriesController : BaseApiController
     {
         var result = await _categoryService.DeleteCategoryAsync(id);
         if (result.IsSuccess)
-            return NoContent(); // Retorna 204 si la operación fue exitosa
+            return NoContent(); // Retorna 204 si la operación fue exitosa, no necesita devolver un apiResponse
 
         return NotFound(new ApiResponse(404, result.ErrorMessage));
     }

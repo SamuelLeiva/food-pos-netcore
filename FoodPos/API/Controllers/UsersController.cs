@@ -1,5 +1,6 @@
 ﻿using API.Dtos.Users;
 using API.Helpers.Errors;
+using API.Helpers.Response;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -35,12 +36,12 @@ public class UsersController : BaseApiController
         if (result.IsSuccess)
         {
             SetRefreshTokenInCookie(result.Data.RefreshToken);
-            return Ok(result.Data);
+            return Ok(new ApiResponse<UserDataDto>(200, "Token generated successfully.", result.Data));
         }
         return BadRequest(new ApiResponse(400, result.ErrorMessage));
     }
 
-    [Authorize(Roles = "Admin")]
+    //[Authorize(Roles = "Admin")]
     [HttpPost("addrole")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -69,7 +70,7 @@ public class UsersController : BaseApiController
         if (result.IsSuccess)
         {
             SetRefreshTokenInCookie(result.Data.RefreshToken);
-            return Ok(result.Data);
+            return Ok(new ApiResponse<UserDataDto>(200, "Token refreshed successfully.", result.Data));
         }
 
         return BadRequest(new ApiResponse(400, result.ErrorMessage));

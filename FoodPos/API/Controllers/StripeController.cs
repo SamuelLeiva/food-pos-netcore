@@ -1,4 +1,6 @@
-﻿using API.Helpers.Errors;
+﻿using API.Dtos.Stripe;
+using API.Helpers.Errors;
+using API.Helpers.Response;
 using API.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -15,17 +17,18 @@ public class StripeController : BaseApiController
     }
 
     [HttpPost("create-payment-intent")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<string>> CreatePaymentIntent([FromBody] long amount)
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    public async Task<ActionResult> CreatePaymentIntent([FromBody] PaymentIntentDto paymentIntentDto)
     {
-        var result = await _stripeService.CreatePaymentIntentAsync(amount);
+        // luego añadir validaciones de existencia
+        var result = await _stripeService.CreatePaymentIntentAsync(paymentIntentDto);
 
         if (result.IsSuccess)
-            // Retorna un Ok con el client_secret en caso de éxito
-            return Ok(result.Data);
-
-        // Retorna un BadRequest con el mensaje de error si la operación falló
+            return Ok(new ApiResponse<string>(200, "Payment created successfully.", result.Data));
+        
         return BadRequest(new ApiResponse(400, result.ErrorMessage));
+
+        
     }
 }

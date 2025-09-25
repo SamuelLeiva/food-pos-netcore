@@ -1,5 +1,6 @@
 ﻿using API.Dtos.Roles;
 using API.Helpers.Errors;
+using API.Helpers.Response;
 using API.Services.Interfaces;
 using AutoMapper;
 using Core.Entities;
@@ -24,11 +25,11 @@ public class RolesController : BaseApiController
     [ProducesResponseType(StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public async Task<ActionResult<Role>> Post(RoleDto roleDto)
+    public async Task<ActionResult<RoleDto>> Post(RoleDto roleDto)
     {
         var result = await _roleService.CreateRoleAsync(roleDto);
         if (result.IsSuccess)
-            return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, result.Data);
+            return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, new ApiResponse<RoleDto>(201, "Role created successfully.", result.Data));
 
         return Conflict(new ApiResponse(409, result.ErrorMessage));
 
@@ -51,11 +52,11 @@ public class RolesController : BaseApiController
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<Role>> Get(int id)
+    public async Task<ActionResult<RoleDto>> Get(int id)
     {
         var result = await _roleService.GetRoleByIdAsync(id);
         if (result.IsSuccess)
-            return Ok(result.Data);
+            return Ok(new ApiResponse<RoleDto>(200, "Role retrieved successfully.", result.Data));
 
         return NotFound(new ApiResponse(404, result.ErrorMessage));
     }

@@ -1,6 +1,7 @@
 ﻿using API.Dtos.Products;
 using API.Helpers;
 using API.Helpers.Errors;
+using API.Helpers.Response;
 using API.Services.Interfaces;
 using AutoMapper;
 using Core.Entities;
@@ -30,7 +31,7 @@ namespace API.Controllers
         {
             var result = await _productService.GetProductsAsync(productParams);
             if (result.IsSuccess)
-                return Ok(result.Data);
+                return Ok(new ApiResponse<Pager<ProductDto>>(200, "Products retrieved successfully.", result.Data));
 
             return BadRequest(new ApiResponse(400, result.ErrorMessage));
         }
@@ -43,7 +44,8 @@ namespace API.Controllers
         {
             var result = await _productService.GetProductsByCategoryAsync(categoryId, productParams);
             if (result.IsSuccess)
-                return Ok(result.Data);
+                return Ok(new ApiResponse<Pager<ProductDto>>(200, "Products by category retrieved successfully.", result.Data));
+
 
             return BadRequest(new ApiResponse(400, result.ErrorMessage));
         }
@@ -57,7 +59,7 @@ namespace API.Controllers
         {
             var result = await _productService.GetProductByIdAsync(id);
             if (result.IsSuccess)
-                return Ok(result.Data);
+                return Ok(new ApiResponse<ProductDto>(200, "Product retrieved successfully.", result.Data));
 
             return NotFound(new ApiResponse(404, result.ErrorMessage));
         }
@@ -72,7 +74,8 @@ namespace API.Controllers
         {
             var result = await _productService.CreateProductAsync(productDto);
             if (result.IsSuccess)
-                return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, result.Data);
+                return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, new ApiResponse<ProductDto>(201, "Product created successfully.", result.Data));
+
 
             return Conflict(new ApiResponse(409, result.ErrorMessage));
         }
@@ -89,7 +92,7 @@ namespace API.Controllers
             var result = await _productService.UpdateProductAsync(id, productDto);
 
             if (result.IsSuccess)
-                return Ok(result.Data);
+                return Ok(new ApiResponse<ProductDto>(200, "Product updated successfully.", result.Data));
 
             // Dependiendo del mensaje de error, retorna 404 o 409
             if (result.ErrorMessage.Contains("does not exist"))

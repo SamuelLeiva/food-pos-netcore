@@ -15,14 +15,22 @@ public class StripeService : IStripeService
         _stripeOptions = stripeOptions.Value;
         StripeConfiguration.ApiKey = _stripeOptions.SecretKey;
     }
-    public async Task<ServiceResult<string>> CreatePaymentIntentAsync(long amount)
+    public async Task<ServiceResult<string>> CreatePaymentIntentAsync(PaymentIntentDto paymentIntentDto)
     {
         try
         {
             var options = new PaymentIntentCreateOptions
             {
-                Amount = amount,
-                Currency = "usd", // otras opciones si fuesen necesarias
+                Amount = paymentIntentDto.Amount,
+                Currency = paymentIntentDto.Currency,
+                Customer = paymentIntentDto.CustomerId.ToString(),
+                ReceiptEmail = paymentIntentDto.CustomerEmail,
+                Description = paymentIntentDto.Description,
+                Metadata = new Dictionary<string, string>
+                {
+                    {"OrderId", paymentIntentDto.OrderId.ToString() },
+                    {"CustomerName", paymentIntentDto.CustomerName }
+                }
             };
 
             var service = new PaymentIntentService();
