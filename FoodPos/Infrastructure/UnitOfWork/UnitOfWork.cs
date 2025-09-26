@@ -16,6 +16,7 @@ namespace Infrastructure.UnitOfWork
         private ICategoryRepository _categories;
         private IUserRepository _users;
         private IRoleRepository _roles;
+        private IOrderRepository _orders;
 
         public UnitOfWork(PosContext context)
         {
@@ -67,6 +68,18 @@ namespace Infrastructure.UnitOfWork
                     _roles = new RoleRepository(_context);
                 }
                 return _roles;
+            }
+        }
+
+        public IOrderRepository Orders
+        {
+            get
+            {
+                if (_orders == null)
+                {
+                    _orders = new OrderRepository(_context);
+                }
+                return _orders;
             }
         }
 

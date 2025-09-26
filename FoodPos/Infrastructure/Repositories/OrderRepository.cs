@@ -16,12 +16,57 @@ public class OrderRepository : GenericRepository<Order>, IOrderRepository
     {
     }
 
-    public async Task<IEnumerable<Order>> GetOrdersByUserIdAsync(int userId)
+    //sobrescribimos los gets para que traigan los valores deseados y no null
+    public override async Task<Order> GetByIdAsync(int id)
+    {
+        return await _context.Orders
+                        .Include(o => o.OrderItems)
+                        .FirstOrDefaultAsync(o => o.Id == id);
+    }
+
+    public override async Task<(int totalRegisters, IEnumerable<Order> registers)> GetAllAsync(int pageIndex, int pageSize, string search)
     {
         var query = _context.Orders as IQueryable<Order>;
-        query = query.Where(o => o.UserId == userId);
-        var registers = await query.ToListAsync();
 
-        return registers;
+        if (!String.IsNullOrEmpty(search))
+        {
+            query = query.Where(o => o.UserId.ToString().Contains(search));
+        }
+
+        var totalRegisters = await query
+                                    .CountAsync();
+
+        var registers = await query
+                                .Include(o => o.OrderItems)
+                                .Skip((pageIndex - 1) * pageSize)
+                                .Take(pageSize)
+                                .ToListAsync();
+
+        return (totalRegisters, registers);
+    }
+
+
+    public async Task<(int totalRegisters, IEnumerable<Order> registers)> GetOrdersByUserIdAsync(int userId, int pageIndex, int pageSize, string search)
+    {
+        var query = _context.Orders as IQueryable<Order>;
+
+        // buscamos por id de user
+        if (!String.IsNullOrEmpty(search))
+        {
+            query = query.Where(o => o.UserId.ToString().Contains(search));
+        }
+
+        query = query.Where(o => o.UserId == userId);
+
+        var totalRegisters = await query
+                                    .CountAsync();
+
+        var registers = await query
+                                .Include(o => o.OrderItems)
+                                .Skip((pageIndex - 1) * pageSize)
+                                .Take(pageSize)
+                                .ToListAsync();
+
+        return (totalRegisters, registers);
     }
 }

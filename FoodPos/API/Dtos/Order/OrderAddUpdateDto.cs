@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Core.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace API.Dtos.Order;
 
@@ -11,4 +12,8 @@ public class OrderAddUpdateDto
     [Required(ErrorMessage = "Receipt email is required.")]
     [EmailAddress(ErrorMessage = "The email format is invalid.")]
     public string ReceiptEmail { get; set; }
+
+    [Required(ErrorMessage = "Order status is required.")]
+    [EnumDataType(typeof(OrderStatus), ErrorMessage = "Invalid order status. Must be one of: Pending, Processing, Completed, Shipped, Canceled.")]
+    public string Status { get; set; }
 }

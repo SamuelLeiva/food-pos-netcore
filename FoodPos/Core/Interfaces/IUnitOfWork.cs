@@ -12,6 +12,7 @@ namespace Core.Interfaces
         ICategoryRepository Categories { get; }
         IUserRepository Users { get; }
         IRoleRepository Roles { get; }
+        IOrderRepository Orders { get; }
         Task<int> SaveAsync();
     }
 
