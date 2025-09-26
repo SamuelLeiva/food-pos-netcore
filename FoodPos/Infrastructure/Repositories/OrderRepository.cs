@@ -21,6 +21,7 @@ public class OrderRepository : GenericRepository<Order>, IOrderRepository
     {
         return await _context.Orders
                         .Include(o => o.OrderItems)
+                        .ThenInclude(oi => oi.Product)
                         .FirstOrDefaultAsync(o => o.Id == id);
     }
 
@@ -38,6 +39,7 @@ public class OrderRepository : GenericRepository<Order>, IOrderRepository
 
         var registers = await query
                                 .Include(o => o.OrderItems)
+                                .ThenInclude(oi => oi.Product)
                                 .Skip((pageIndex - 1) * pageSize)
                                 .Take(pageSize)
                                 .ToListAsync();
@@ -63,6 +65,7 @@ public class OrderRepository : GenericRepository<Order>, IOrderRepository
 
         var registers = await query
                                 .Include(o => o.OrderItems)
+                                .ThenInclude(oi => oi.Product)
                                 .Skip((pageIndex - 1) * pageSize)
                                 .Take(pageSize)
                                 .ToListAsync();

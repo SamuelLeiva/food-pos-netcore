@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace API.Dtos.Order;
 
-public class OrderAddUpdateDto
+public class OrderAddDto
 {
     [Required(ErrorMessage = "The OrderItems list cannot be empty.")]
     [MinLength(1, ErrorMessage = "An order must contain at least one item.")]

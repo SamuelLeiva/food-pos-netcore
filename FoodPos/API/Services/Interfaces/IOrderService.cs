@@ -7,9 +7,9 @@ namespace API.Services.Interfaces;
 
 public interface IOrderService
 {
-    Task<ServiceResult<OrderDto>> CreateOrderAsync(OrderAddUpdateDto orderDto);
-    Task<ServiceResult<OrderDto>> UpdateOrderAsync(int id, OrderAddUpdateDto orderDto);
-    Task<ServiceResult<OrderDto>> GetOrderByIsAsync(int id);
+    Task<ServiceResult<OrderDto>> CreateOrderAsync(OrderAddDto orderDto, int userId);
+    Task<ServiceResult<OrderDto>> UpdateOrderAsync(int id, OrderUpdateDto orderDto);
+    Task<ServiceResult<OrderDto>> GetOrderByIdAsync(int id);
     Task<ServiceResult<Pager<OrderDto>>> GetOrdersAsync(Params orderParams);
     Task<ServiceResult<Pager<OrderDto>>> GetOrdersByUserAsync(int userId, Params orderParams);
 }

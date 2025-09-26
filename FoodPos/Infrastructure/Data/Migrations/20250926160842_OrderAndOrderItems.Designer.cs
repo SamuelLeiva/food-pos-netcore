@@ -4,6 +4,7 @@ using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Data.Migrations
 {
     [DbContext(typeof(PosContext))]
-    partial class PosContextModelSnapshot : ModelSnapshot
+    [Migration("20250926160842_OrderAndOrderItems")]
+    partial class OrderAndOrderItems
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -58,8 +61,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("datetime(6)");
 
                     b.Property<string>("PaymentIntentId")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<string>("ReceiptEmail")
                         .HasMaxLength(200)
@@ -69,8 +72,8 @@ namespace Infrastructure.Data.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("StripeCustomerId")
-                        .HasMaxLength(256)
-                        .HasColumnType("varchar(256)");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<decimal>("TotalAmount")
                         .HasColumnType("decimal(18,2)");

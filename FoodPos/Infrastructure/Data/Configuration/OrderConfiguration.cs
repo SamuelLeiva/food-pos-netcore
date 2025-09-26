@@ -21,9 +21,9 @@ public class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.TotalAmount)
             .HasColumnType("decimal(18,2)");
         builder.Property(o => o.PaymentIntentId)
-            .IsRequired();
+            .HasMaxLength(256);
         builder.Property(o => o.StripeCustomerId)
-            .IsRequired();
+            .HasMaxLength(256);
         builder.Property(o => o.ReceiptEmail)
             .HasMaxLength(200);
     }

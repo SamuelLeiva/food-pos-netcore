@@ -42,11 +42,22 @@ public class MappingProfiles : Profile
 
         CreateMap<Order, OrderDto>()
             .ForMember(dest => dest.OrderItems, opt => opt.MapFrom(src => src.OrderItems));
-        CreateMap<OrderAddUpdateDto, Order>()
+        CreateMap<OrderAddDto, Order>()
             .ForMember(dest => dest.Status, opt => opt.MapFrom(src => Enum.Parse(typeof(OrderStatus), src.Status)))
             .ForMember(dest => dest.TotalAmount, opt => opt.Ignore())
             .ForMember(dest => dest.PaymentIntentId, opt => opt.Ignore())
             .ForMember(dest => dest.StripeCustomerId, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.Ignore());
+        CreateMap<OrderUpdateDto, Order>()
+            .ForMember(
+                dest => dest.Status,
+                opt => opt.MapFrom(src => Enum.Parse(typeof(OrderStatus), src.Status))
+            )
+            .ForMember(dest => dest.OrderItems, opt => opt.Ignore())
+            .ForMember(dest => dest.TotalAmount, opt => opt.Ignore())
+            .ForMember(dest => dest.PaymentIntentId, opt => opt.Ignore())
+            .ForMember(dest => dest.StripeCustomerId, opt => opt.Ignore())
+            .ForMember(dest => dest.ReceiptEmail, opt => opt.Ignore())
             .ForMember(dest => dest.User, opt => opt.Ignore());
     }
 }

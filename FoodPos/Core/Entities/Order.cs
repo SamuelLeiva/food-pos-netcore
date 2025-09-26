@@ -11,9 +11,9 @@ public class Order : BaseEntity
 {
     public OrderStatus Status { get; set; } = OrderStatus.Pending;
     public decimal TotalAmount { get; set; }
-    public string PaymentIntentId { get; set; }
+    public string? PaymentIntentId { get; set; }
     // id del customer en Stripe
-    public string StripeCustomerId { get; set; }
+    public string? StripeCustomerId { get; set; }
     // email hacia donde se envía el recibo. Si es que no es el mismo que el del usuario
     public string ReceiptEmail { get; set; }
 

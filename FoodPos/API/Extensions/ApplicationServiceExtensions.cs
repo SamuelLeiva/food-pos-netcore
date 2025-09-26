@@ -6,7 +6,6 @@ using Asp.Versioning;
 using AspNetCoreRateLimit;
 using Core.Entities;
 using Core.Interfaces;
-using Infrastructure.Repositories;
 using Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -36,6 +35,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IStripeService, StripeService>();
+        services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IPasswordHasher<User>, PasswordHasher<User>>();
     }
 
