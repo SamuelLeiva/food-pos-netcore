@@ -1,120 +1,120 @@
 # Food POS API
 
-Una API RESTful de un POS de un negocio de comida robusta y modular construida con **ASP.NET Core** que implementa patrones de diseño esenciales (como el patrón Unit of Work y Servicios), utiliza **JWT** para autenticación y autorización basada en roles, y maneja pagos a través de **Stripe**.  
-La API sigue una **arquitectura limpia** para la gestión de productos, roles, usuarios y el ciclo de vida de las órdenes.
+A robust and modular RESTful API for a food business POS built with **ASP.NET Core**, implementing essential design patterns (such as the Unit of Work and Services), using **JWT** for authentication and role-based authorization, and handling payments through **Stripe**.  
+The API follows a **clean architecture** for managing products, roles, users, and the full order lifecycle.
 
 ---
 
-## 🚀 Características Principales
+## 🚀 Main Features
 
-- **Autenticación y Autorización**: JWT Bearer con Refresh Tokens y autorización basada en roles (Admin, Client).
-- **Patrones de Diseño**: Implementación de Unit of Work y Repositorio Genérico para abstracción de la base de datos.
-- **Base de Datos**: Configurada con MySQL y Entity Framework Core.
-- **Pasarela de Pago**: Integración completa con Stripe para la creación y gestión de Payment Intents.
-- **Manejo de Errores**: Respuestas HTTP uniformes y controladas (400, 401, 404, 409, 500) manejadas centralmente con la extensión `ServiceResult.ToActionResult()`.
-- **Documentación**: Interfaz interactiva Swagger/OpenAPI para pruebas y referencia.
+- **Authentication & Authorization**: JWT Bearer with Refresh Tokens and role-based access (Admin, Client).
+- **Design Patterns**: Implementation of Unit of Work and Generic Repository for database abstraction.
+- **Database**: Configured with MySQL and Entity Framework Core.
+- **Payment Gateway**: Full integration with Stripe for creating and managing Payment Intents.
+- **Error Handling**: Consistent and centralized HTTP responses (400, 401, 404, 409, 500) using the extension `ServiceResult.ToActionResult()`.
+- **Documentation**: Interactive Swagger/OpenAPI interface for testing and reference.
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Technologies Used
 
 - **Framework**: .NET 8 / ASP.NET Core  
-- **Base de Datos**: MySQL  
+- **Database**: MySQL  
 - **ORM**: Entity Framework Core  
-- **Autenticación**: JWT, Refresh Tokens, Identity (usando `IPasswordHasher`)  
-- **Mapeo**: AutoMapper  
-- **Pagos**: Stripe .NET SDK  
-- **Documentación**: Swashbuckle (OpenAPI)  
+- **Authentication**: JWT, Refresh Tokens, Identity (using `IPasswordHasher`)  
+- **Mapping**: AutoMapper  
+- **Payments**: Stripe .NET SDK  
+- **Documentation**: Swashbuckle (OpenAPI)  
 
 ---
 
-## ⚙️ Configuración del Entorno
+## ⚙️ Environment Setup
 
-Para ejecutar el proyecto localmente, necesitas:
+To run the project locally, you will need:
 
-- .NET 8 SDK (o superior).  
-- Un servidor MySQL (local o en la nube).  
-- Una cuenta de Stripe (para obtener claves de prueba).  
+- .NET 8 SDK (or higher)  
+- A MySQL server (local or cloud)  
+- A Stripe account (to get test keys)  
 
-### 1. Clonar el Repositorio
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/tu-usuario/tu-repo.git
-cd tu-repo
+git clone https://https://github.com/SamuelLeiva/food-pos-netcore.git
+cd food-pos-netcore
 ```
 
-### 2. Configurar appsettings.json
+### 2. Configure appsettings.json
 
-Crea un archivo appsettings.Development.json o edita appsettings.json con tus credenciales:
+Create an appsettings.Development.json file or edit appsettings.json with your credentials:
 
 ```bash
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=tu_db;User=tu_user;Password=tu_password;"
+    "DefaultConnection": "Server=localhost;Database=your_db;User=your_user;Password=your_password;"
   },
   "JWT": {
-    "Key": "UNA_CLAVE_SECRETA_LARGA_DE_AL_MENOS_32_CARACTERES",
-    "Issuer": "TuApiIssuer",
-    "Audience": "TuApiAudience",
+    "Key": "A_LONG_SECRET_KEY_WITH_AT_LEAST_32_CHARACTERS",
+    "Issuer": "YourApiIssuer",
+    "Audience": "YourApiAudience",
     "DurationInMinutes": 60
   },
   "StripeOptions": {
     "PublishableKey": "pk_test_...",
     "SecretKey": "sk_test_..."
   }
-  // ... otras configuraciones de Serilog
+  // ... other Serilog settings
 }
 ```
 
-### 3. Ejecutar Migraciones
+### 3. Apply Migrations
 
-Asegúrate de que tu base de datos esté creada y aplica las migraciones:
+Make sure your database exists and apply migrations:
 
 ```bash
 dotnet ef database update
 ```
 
-El Program.cs ya está configurado para ejecutar migraciones y seeding al inicio, pero es buena práctica hacerlo manualmente.
+Program.cs is already configured to run migrations and seeding on startup, but it’s a good practice to apply them manually.
 
-### 4. Ejecutar la API
+### 4. Run the API
 
-Ejecuta el proyecto desde la raíz de la solución:
+Run the project from the root of the solution:
 
 ```bash
 dotnet run
 ```
 
-La API estará disponible en la dirección especificada en launchSettings.json(usualmente: <https://localhost:7001>).
+The API will be available at the URL specified in launchSettings.json (usually: <https://localhost:7001>).
 
-## 📚 Documentación y Endpoints
+## 📚 Documentation & Endpoints
 
-La documentación interactiva de Swagger estará disponible en:
+Swagger interactive documentation will be available at:
 
 👉 <https://localhost:7001/swagger>
 
-## 💡 Arquitectura y Estructura de Clases
+## 💡 Architecture & Class Structure
 
-La API sigue una arquitectura de tres capas:
+The API follows a three-layer architecture:
 
-- **API**: Controllers, DTOs, Extensiones y la lógica de presentación/mapeo.
+- **API**: Controllers, DTOs, Extensions, and presentation/mapping logic.
 
-- **Core**: Entidades (User, Product, Order), Interfaces de Repositorios, Interfaces de Servicios, y la clase ServiceResult (con soporte de StatusCode).
+- **Core**: Entities (User, Product, Order), Repository Interfaces, Service Interfaces, and the ServiceResult class (with StatusCode support).
 
-- **Infrastructure**: Implementaciones de Repositorios, UnitOfWork, DbContext, y lógica de seeding.
+- **Infrastructure**: Repository implementations, UnitOfWork, DbContext, and seeding logic.
 
-## ⚠️ Uso de ServiceResult (Manejo de Errores)
+## ⚠️ ServiceResult Usage (Error Handling)
 
-En lugar de lanzar excepciones, todos los métodos de servicio devuelven un ServiceResult o ServiceReult`<T>`.
+Instead of throwing exceptions, all service methods return a ServiceResult or ServiceResult`<T>`.
 
 ```bash
-// Dentro de un Service:
+// Inside a Service:
 if (product == null)
 {
-    // Retorna el mensaje de error junto con el código 404
+    // Returns the error message along with the 404 status code
     return ServiceResult<ProductDto>.Failure("Product not found.", 404);
 }
 
-// Dentro del Controller:
-// El método ToActionResult() lee el StatusCode (404) y genera la respuesta HTTP
+// Inside the Controller:
+// The ToActionResult() method reads the StatusCode (404) and generates the HTTP response
 return result.ToActionResult();
 ```
