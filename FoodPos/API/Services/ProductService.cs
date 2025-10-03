@@ -18,6 +18,7 @@ public class ProductService : IProductService
         _unitOfWork = unitOfWork;
         _mapper = mapper;
     }
+
     public async Task<ServiceResult<Pager<ProductDto>>> GetProductsAsync(Params productParams)
     {
         try
@@ -29,9 +30,11 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult<Pager<ProductDto>>.Failure($"An unexpected error occurred while retrieving products: {ex.Message}");
+            // 500 Internal Server Error: Para errores inesperados de la base de datos o lógica.
+            return ServiceResult<Pager<ProductDto>>.Failure($"An unexpected error occurred while retrieving products: {ex.Message}", 500);
         }
     }
+
     public async Task<ServiceResult<ProductDto>> GetProductByIdAsync(int id)
     {
         try
@@ -39,14 +42,16 @@ public class ProductService : IProductService
             var product = await _unitOfWork.Products.GetByIdAsync(id);
             if (product == null)
             {
-                return ServiceResult<ProductDto>.Failure("The product requested does not exist.");
+                // 404 Not Found: El recurso solicitado no existe.
+                return ServiceResult<ProductDto>.Failure("The product requested does not exist.", 404);
             }
             var productDto = _mapper.Map<ProductDto>(product);
             return ServiceResult<ProductDto>.Success(productDto);
         }
         catch (Exception ex)
         {
-            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while retrieving the product: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while retrieving the product: {ex.Message}", 500);
         }
     }
 
@@ -60,7 +65,8 @@ public class ProductService : IProductService
 
             if (productExists != null)
             {
-                return ServiceResult<ProductDto>.Failure("A product with the same name already exists.");
+                // 409 Conflict: El recurso que intentas crear ya existe.
+                return ServiceResult<ProductDto>.Failure("A product with the same name already exists.", 409);
             }
 
             var product = _mapper.Map<Product>(productDto);
@@ -74,7 +80,8 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while creating the product: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while creating the product: {ex.Message}", 500);
         }
     }
 
@@ -85,7 +92,8 @@ public class ProductService : IProductService
             var productDb = await _unitOfWork.Products.GetByIdAsync(id);
             if (productDb == null)
             {
-                return ServiceResult<ProductDto>.Failure("The product requested does not exist.");
+                // 404 Not Found: El recurso a actualizar no existe.
+                return ServiceResult<ProductDto>.Failure("The product requested does not exist.", 404);
             }
 
             var productExists = _unitOfWork.Products
@@ -94,7 +102,8 @@ public class ProductService : IProductService
 
             if (productExists != null)
             {
-                return ServiceResult<ProductDto>.Failure("Another product with the same name already exists.");
+                // 409 Conflict: Intentaste renombrar el producto a un nombre que ya está en uso.
+                return ServiceResult<ProductDto>.Failure("Another product with the same name already exists.", 409);
             }
 
             _mapper.Map(productDto, productDb);
@@ -106,9 +115,11 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while updating the product: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<ProductDto>.Failure($"An unexpected error occurred while updating the product: {ex.Message}", 500);
         }
     }
+
     public async Task<ServiceResult> DeleteProductAsync(int id)
     {
         try
@@ -116,7 +127,8 @@ public class ProductService : IProductService
             var product = await _unitOfWork.Products.GetByIdAsync(id);
             if (product == null)
             {
-                return ServiceResult.Failure("The product requested does not exist.");
+                // 404 Not Found: El recurso a eliminar no existe.
+                return ServiceResult.Failure("The product requested does not exist.", 404);
             }
 
             _unitOfWork.Products.Remove(product);
@@ -125,7 +137,8 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult.Failure($"An unexpected error occurred while deleting the product: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult.Failure($"An unexpected error occurred while deleting the product: {ex.Message}", 500);
         }
     }
 
@@ -140,7 +153,8 @@ public class ProductService : IProductService
         }
         catch (Exception ex)
         {
-            return ServiceResult<Pager<ProductDto>>.Failure($"An unexpected error occurred while retrieving the products: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<Pager<ProductDto>>.Failure($"An unexpected error occurred while retrieving the products: {ex.Message}", 500);
         }
     }
 }

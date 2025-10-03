@@ -1,4 +1,5 @@
 ﻿using API.Dtos.Categories;
+using API.Extensions;
 using API.Helpers;
 using API.Helpers.Errors;
 using API.Helpers.Response;
@@ -17,65 +18,62 @@ public class CategoriesController : BaseApiController
         _categoryService = categoryService;
     }
 
+    // El método ToActionResult maneja el 200 (Success) y el 500 (Catch/Error)
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)] // Usamos 500 para errores de servicio
     public async Task<ActionResult<List<CategoryDto>>> Get()
     {
         var result = await _categoryService.GetCategoriesAsync();
-        if (result.IsSuccess)
-            return Ok(new ApiResponse<List<CategoryDto>>(200, "Categories retrieved successfully.", result.Data));
-
-        return BadRequest(new ApiResponse(400, result.ErrorMessage));
+        // Control total: retorna 200 OK o 500 ObjectResult con el cuerpo ApiResponse
+        return result.ToActionResult();
     }
 
     [HttpGet("paginated")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<Pager<CategoryDto>>> Get([FromQuery] Params categoryParams)
     {
         var result = await _categoryService.GetCategoriesPaginatedAsync(categoryParams);
-        if (result.IsSuccess)
-            return Ok(new ApiResponse<Pager<CategoryDto>>(200, "Categories paginated successfully.", result.Data));
-
-        return BadRequest(new ApiResponse(400, result.ErrorMessage));
+        // Control total
+        return result.ToActionResult();
     }
 
     [HttpGet("{id}")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)] // Error de Service (Category not found)
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryDto>> Get(int id)
     {
         var result = await _categoryService.GetCategoryByIdAsync(id);
-
-        if (result.IsSuccess)
-            return Ok(new ApiResponse<CategoryDto>(200, "Category retrieved successfully.", result.Data));
-
-        return NotFound(new ApiResponse(404, result.ErrorMessage));
+        // Control total: retorna 200 OK, 404 Not Found o 500 Internal Server Error
+        return result.ToActionResult();
     }
 
     [HttpPost]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)] // Error de Service (Duplicate name)
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryDto>> Post(CategoryAddUpdateDto categoryDto)
     {
         var result = await _categoryService.CreateCategoryAsync(categoryDto);
 
         if (result.IsSuccess)
-            return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, new ApiResponse<CategoryDto>(201, "Category created successfully.", result.Data));
+            // Para 201 Created, es necesario mantener CreatedAtAction para enviar la URL del recurso creado
+            return CreatedAtAction(nameof(Get), new { id = result.Data.Id },
+                                    new ApiResponse<CategoryDto>(201, "Category created successfully.", result.Data));
 
-        return Conflict(new ApiResponse(409, result.ErrorMessage));
+        // Fallo: ToActionResult aplica el 409 o 500 del ServiceResult
+        return result.ToActionResult();
     }
 
     [HttpPut("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)] // Error de Service (Category not found)
+    [ProducesResponseType(StatusCodes.Status409Conflict)] // Error de Service (Duplicate name)
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<ActionResult<CategoryDto>> Put(int id, [FromBody] CategoryAddUpdateDto categoryDto)
     {
         var result = await _categoryService.UpdateCategoryAsync(id, categoryDto);
@@ -83,26 +81,18 @@ public class CategoriesController : BaseApiController
         if (result.IsSuccess)
             return Ok(new ApiResponse<CategoryDto>(200, "Category updated successfully.", result.Data));
 
-        // Dependiendo del error, retorna un 404 o un 409
-        if (result.ErrorMessage.Contains("does not exist"))
-        {
-            return NotFound(new ApiResponse(404, result.ErrorMessage));
-        }
-        return Conflict(new ApiResponse(409, result.ErrorMessage));
+        // Fallo: ToActionResult aplica el 404, 409 o 500 del ServiceResult
+        return result.ToActionResult();
     }
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)] // Error de Service (Category not found)
+    [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> Delete(int id)
     {
         var result = await _categoryService.DeleteCategoryAsync(id);
-        if (result.IsSuccess)
-            return NoContent(); // Retorna 204 si la operación fue exitosa, no necesita devolver un apiResponse
-
-        return NotFound(new ApiResponse(404, result.ErrorMessage));
+        return result.ToActionResult();
     }
-
-
 }

@@ -36,7 +36,8 @@ public class UserService : IUserService
                                     .Find(u => u.UserName.ToLower() == registerDto.UserName.ToLower() || u.Email.ToLower() == registerDto.Email.ToLower())
                                     .FirstOrDefault();
             if (userExists != null)
-                return ServiceResult.Failure($"The email or username is already registered.");
+                // 409 Conflict: El recurso (usuario/email) ya existe.
+                return ServiceResult.Failure($"The email or username is already registered.", 409);
 
             var user = new User
             {
@@ -55,7 +56,8 @@ public class UserService : IUserService
                                     .FirstOrDefault();
 
             if (defaultRole == null)
-                return ServiceResult.Failure("Default role not found. Please contact support.");
+                // 500 Internal Server Error: Error de configuración de la aplicación (rol no encontrado).
+                return ServiceResult.Failure("Default role not found. Please contact support.", 500);
 
             user.Roles.Add(defaultRole);
             _unitOfWork.Users.Add(user);
@@ -65,7 +67,8 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            return ServiceResult.Failure($"An unexpected error occurred during registration: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult.Failure($"An unexpected error occurred during registration: {ex.Message}", 500);
         }
     }
 
@@ -74,15 +77,17 @@ public class UserService : IUserService
         try
         {
             var user = await _unitOfWork.Users
-                                .GetByUserNameAsync(model.UserName);
+                                        .GetByUserNameAsync(model.UserName);
 
             if (user == null)
-                return ServiceResult<UserDataDto>.Failure($"There is no user with the username {model.UserName}.");
+                // 404 Not Found (aunque 401 es más seguro para login)
+                return ServiceResult<UserDataDto>.Failure($"There is no user with the username {model.UserName}.", 404);
 
             var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
 
             if (result != PasswordVerificationResult.Success)
-                return ServiceResult<UserDataDto>.Failure($"Wrong credentials for user {model.UserName}.");
+                // 401 Unauthorized: Credenciales inválidas.
+                return ServiceResult<UserDataDto>.Failure($"Wrong credentials for user {model.UserName}.", 401);
 
             var userDataDto = new UserDataDto();
             userDataDto.IsAuth = true;
@@ -112,7 +117,8 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            return ServiceResult<UserDataDto>.Failure($"An unexpected error occurred during login: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<UserDataDto>.Failure($"An unexpected error occurred during login: {ex.Message}", 500);
         }
     }
 
@@ -123,12 +129,14 @@ public class UserService : IUserService
             var user = await _unitOfWork.Users.GetByRefreshTokenAsync(refreshToken);
 
             if (user == null)
-                return ServiceResult<UserDataDto>.Failure($"The token does not belong to any user.");
+                // 404 Not Found: El token no corresponde a ningún usuario.
+                return ServiceResult<UserDataDto>.Failure($"The token does not belong to any user.", 404);
 
             var refreshTokenBd = user.RefreshTokens.Single(x => x.Token == refreshToken);
 
             if (!refreshTokenBd.IsActive)
-                return ServiceResult<UserDataDto>.Failure($"The token is not active.");
+                // 401 Unauthorized: El token ha sido revocado o expiró.
+                return ServiceResult<UserDataDto>.Failure($"The token is not active.", 401);
 
             refreshTokenBd.Revoked = DateTime.UtcNow;
             var newRefreshToken = CreateRefreshToken();
@@ -150,7 +158,8 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            return ServiceResult<UserDataDto>.Failure($"An unexpected error occurred during token refresh: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<UserDataDto>.Failure($"An unexpected error occurred during token refresh: {ex.Message}", 500);
         }
     }
 
@@ -160,8 +169,8 @@ public class UserService : IUserService
         {
             var user = await _unitOfWork.Users.GetByRefreshTokenAsync(refreshToken);
 
-            // Returning success even if the token is not found is a good security practice
-            // to prevent leaking information about valid/invalid tokens.
+            // Se mantiene ServiceResult.Success() para no dar información de seguridad
+            // sobre la existencia de tokens específicos, incluso si no existe o ya está revocado.
             if (user == null)
                 return ServiceResult.Success();
 
@@ -178,7 +187,8 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            return ServiceResult.Failure($"An unexpected error occurred while revoking the token: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult.Failure($"An unexpected error occurred while revoking the token: {ex.Message}", 500);
         }
     }
 
@@ -210,11 +220,11 @@ public class UserService : IUserService
         }
         var claims = new[]
         {
-                                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
-                                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                                new Claim("uid", user.Id.ToString())
-                        }
+            new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+            new Claim(JwtRegisteredClaimNames.Email, user.Email),
+            new Claim("uid", user.Id.ToString())
+        }
         .Union(roleClaims);
         var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
         var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
@@ -234,19 +244,23 @@ public class UserService : IUserService
         {
             var user = await _unitOfWork.Users.GetByUserNameAsync(model.UserName);
             if (user == null)
-                return ServiceResult.Failure($"There is no user with the username {model.UserName}.");
+                // 404 Not Found: El usuario no existe.
+                return ServiceResult.Failure($"There is no user with the username {model.UserName}.", 404);
 
             var result = _passwordHasher.VerifyHashedPassword(user, user.Password, model.Password);
             if (result != PasswordVerificationResult.Success)
-                return ServiceResult.Failure($"Wrong credentials for user {model.UserName}.");
+                // 401 Unauthorized: Las credenciales son incorrectas (para esta operación de seguridad).
+                return ServiceResult.Failure($"Wrong credentials for user {model.UserName}.", 401);
 
             var rolExists = _unitOfWork.Roles.Find(u => u.Name.ToLower() == model.Role.ToLower()).FirstOrDefault();
             if (rolExists == null)
-                return ServiceResult.Failure($"{model.Role} role not found.");
+                // 404 Not Found: El rol a agregar no existe.
+                return ServiceResult.Failure($"{model.Role} role not found.", 404);
 
             var userHasRole = user.Roles.Any(u => u.Id == rolExists.Id);
             if (userHasRole)
-                return ServiceResult.Failure($"User {model.UserName} already has the role {model.Role}.");
+                // 409 Conflict: El usuario ya tiene este rol.
+                return ServiceResult.Failure($"User {model.UserName} already has the role {model.Role}.", 409);
 
             user.Roles.Add(rolExists);
             _unitOfWork.Users.Update(user);
@@ -256,9 +270,8 @@ public class UserService : IUserService
         }
         catch (Exception ex)
         {
-            return ServiceResult.Failure($"An unexpected error occurred while adding the role: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult.Failure($"An unexpected error occurred while adding the role: {ex.Message}", 500);
         }
     }
-
 }
-

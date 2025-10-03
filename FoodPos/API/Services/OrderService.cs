@@ -33,7 +33,8 @@ public class OrderService : IOrderService
             var products = _unitOfWork.Products.Find(p => productIds.Contains(p.Id)).ToList();
 
             if (products.Count != productIds.Count)
-                return ServiceResult<OrderDto>.Failure("One or more products were not found or are invalid.");
+                // 404 Not Found: Uno o más recursos esenciales (productos) no existen.
+                return ServiceResult<OrderDto>.Failure("One or more products were not found or are invalid.", 404);
 
             decimal calculatedTotal = 0;
             var orderItems = new List<OrderItem>();
@@ -48,7 +49,7 @@ public class OrderService : IOrderService
                 {
                     ProductId = itemDto.ProductId,
                     Quantity = itemDto.Quantity,
-                    Price = itemPrice // Snapshot del precio unitario (decimal)
+                    Price = itemPrice
                 });
             }
 
@@ -59,64 +60,59 @@ public class OrderService : IOrderService
             order.TotalAmount = calculatedTotal;
             order.Status = OrderStatus.Pending;
             _unitOfWork.Orders.Add(order);
-            await _unitOfWork.SaveAsync(); // Obtener el Order.Id
+            await _unitOfWork.SaveAsync();
 
             // --- CREACIÓN DEL PAYMENT INTENT EN STRIPE ---
-
-            // Nota: Debes obtener o crear el CustomerId de Stripe para este usuario.
-            // Aquí se usa un placeholder, pero deberías buscarlo en tu User.
-            // Pora hora se usa un usuario por defecto para las pruebas
-            string stripeCustomerId = "cus_T7HI3RTj8Oi5C6";
+            string stripeCustomerId = "cus_T7HI3RTj8Oi5C6"; // Placeholder
 
             var paymentIntentDto = new PaymentIntentDto
             {
-                Amount = (long)Math.Round(calculatedTotal * 100), // CONVERSIÓN A CENTAVOS (long)
-                Currency = "usd", // Asumimos USD
+                Amount = (long)Math.Round(calculatedTotal * 100),
+                Currency = "usd",
                 CustomerId = stripeCustomerId,
                 CustomerEmail = orderDto.ReceiptEmail,
-                CustomerName = "User Name Placeholder", // Debes obtener este nombre
+                CustomerName = "User Name Placeholder",
                 Description = $"Order {order.Id} for user {userId}",
                 OrderId = order.Id
             };
 
-            // Llamada al servicio de Stripe usando el DTO
             var stripeResult = await _stripeService.CreatePaymentIntentAsync(paymentIntentDto);
 
             if (!stripeResult.IsSuccess)
             {
-                // Manejo de fallos: La orden existe, pero el pago falló en Stripe.
-                return ServiceResult<OrderDto>.Failure($"Stripe error: {stripeResult.ErrorMessage}");
+                // 503 Service Unavailable / 500 Internal Server Error: Fallo de integración con servicio externo.
+                return ServiceResult<OrderDto>.Failure($"Stripe error: {stripeResult.ErrorMessage}", 503);
             }
 
             // --- ACTUALIZACIÓN FINAL Y RESPUESTA ---
 
-            order.PaymentIntentId = stripeResult.Data; // El service devuelve el ClientSecret
+            order.PaymentIntentId = stripeResult.Data;
             order.StripeCustomerId = stripeCustomerId;
 
             _unitOfWork.Orders.Update(order);
             await _unitOfWork.SaveAsync();
 
             var createdOrderDto = _mapper.Map<OrderDto>(order);
-            // Si necesitas devolver el ClientSecret, debes agregarlo al OrderDto temporalmente
-            // createdOrderDto.ClientSecret = stripeResult.Data; 
 
             return ServiceResult<OrderDto>.Success(createdOrderDto);
         }
         catch (Exception ex)
         {
-            return ServiceResult<OrderDto>.Failure($"An unexpected error occurred while creating the order: {ex.Message}");
+            // 500 Internal Server Error: Error inesperado del servidor.
+            return ServiceResult<OrderDto>.Failure($"An unexpected error occurred while creating the order: {ex.Message}", 500);
         }
     }
+
     public async Task<ServiceResult<OrderDto>> GetOrderByIdAsync(int id)
     {
         try
         {
-            // Cargar OrderItems y Products para el DTO
-            var order = await _unitOfWork.Orders.GetByIdAsync(id); // Usa la operación específica
+            var order = await _unitOfWork.Orders.GetByIdAsync(id);
 
             if (order == null)
             {
-                return ServiceResult<OrderDto>.Failure("The order requested does not exist.");
+                // 404 Not Found: La orden no existe.
+                return ServiceResult<OrderDto>.Failure("The order requested does not exist.", 404);
             }
 
             var orderDto = _mapper.Map<OrderDto>(order);
@@ -124,7 +120,8 @@ public class OrderService : IOrderService
         }
         catch (Exception ex)
         {
-            return ServiceResult<OrderDto>.Failure($"An unexpected error occurred while retrieving the order: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<OrderDto>.Failure($"An unexpected error occurred while retrieving the order: {ex.Message}", 500);
         }
     }
 
@@ -139,7 +136,8 @@ public class OrderService : IOrderService
         }
         catch (Exception ex)
         {
-            return ServiceResult<Pager<OrderDto>>.Failure($"An unexpected error ocurred while retrieving orders: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<Pager<OrderDto>>.Failure($"An unexpected error ocurred while retrieving orders: {ex.Message}", 500);
         }
     }
 
@@ -154,7 +152,8 @@ public class OrderService : IOrderService
         }
         catch (Exception ex)
         {
-            return ServiceResult<Pager<OrderDto>>.Failure($"An unexpected error occurred while retrieving the orders: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<Pager<OrderDto>>.Failure($"An unexpected error occurred while retrieving the orders: {ex.Message}", 500);
         }
     }
 
@@ -165,17 +164,20 @@ public class OrderService : IOrderService
             var orderDb = await _unitOfWork.Orders.GetByIdAsync(id);
             if (orderDb == null)
             {
-                return ServiceResult<OrderDto>.Failure("The order requested does not exist.");
+                // 404 Not Found: La orden no existe.
+                return ServiceResult<OrderDto>.Failure("The order requested does not exist.", 404);
             }
 
-            // SOLO MAPEAMOS EL STATUS, IGNORANDO OrderItems para prevenir manipulación.
+            // ... (Lógica de actualización de Status)
+
             if (Enum.TryParse(orderDto.Status, out OrderStatus newStatus))
             {
                 orderDb.Status = newStatus;
             }
             else
             {
-                return ServiceResult<OrderDto>.Failure("Invalid status value.");
+                // 400 Bad Request: El valor enviado es inválido.
+                return ServiceResult<OrderDto>.Failure("Invalid status value.", 400);
             }
 
             orderDb.UpdatedAt = DateTime.Now;
@@ -187,7 +189,8 @@ public class OrderService : IOrderService
         }
         catch (Exception ex)
         {
-            return ServiceResult<OrderDto>.Failure($"An unexpected error occurred while updating the order: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<OrderDto>.Failure($"An unexpected error occurred while updating the order: {ex.Message}", 500);
         }
     }
 }

@@ -1,18 +1,13 @@
 ﻿using API.Dtos.Products;
 using API.Helpers;
-using API.Helpers.Errors;
 using API.Helpers.Response;
 using API.Services.Interfaces;
-using AutoMapper;
-using Core.Entities;
-using Core.Interfaces;
-using Infrastructure.UnitOfWork;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using API.Extensions; // Asegúrate de que esta extensión ToActionResult() esté aquí
 
 namespace API.Controllers
 {
-    // [Authorize(Roles ="Admin")]
     public class ProductsController : BaseApiController
     {
         private readonly IProductService _productService;
@@ -22,87 +17,83 @@ namespace API.Controllers
             _productService = productService;
         }
 
-        // Obtener productos paginados
+        // 1. Obtener todos los productos paginados
         [HttpGet]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Client")] // Permitimos acceso a clientes también si es el catálogo principal
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Pager<ProductDto>>> Get([FromQuery] Params productParams)
         {
             var result = await _productService.GetProductsAsync(productParams);
-            if (result.IsSuccess)
-                return Ok(new ApiResponse<Pager<ProductDto>>(200, "Products retrieved successfully.", result.Data));
 
-            return BadRequest(new ApiResponse(400, result.ErrorMessage));
+            // Si es exitoso, devuelve 200 OK. Si falla, devuelve 500 (desde el service)
+            return result.ToActionResult();
         }
 
-        // Obtener productos por categoría
+        // 2. Obtener productos por categoría
         [HttpGet("category/{categoryId}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<Pager<ProductDto>>> Get(int categoryId, [FromQuery] Params productParams)
         {
             var result = await _productService.GetProductsByCategoryAsync(categoryId, productParams);
-            if (result.IsSuccess)
-                return Ok(new ApiResponse<Pager<ProductDto>>(200, "Products by category retrieved successfully.", result.Data));
 
-
-            return BadRequest(new ApiResponse(400, result.ErrorMessage));
+            // Si es exitoso, devuelve 200 OK. Si falla, devuelve el error del service (probablemente 500)
+            return result.ToActionResult();
         }
 
-        // Obtener producto por ID
+        // 3. Obtener producto por ID
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ProductDto>> Get(int id)
         {
             var result = await _productService.GetProductByIdAsync(id);
-            if (result.IsSuccess)
-                return Ok(new ApiResponse<ProductDto>(200, "Product retrieved successfully.", result.Data));
 
-            return NotFound(new ApiResponse(404, result.ErrorMessage));
+            // Si falla, ToActionResult usará el 404 NotFound o el 500 del service.
+            return result.ToActionResult();
         }
 
-        // Crear un nuevo producto
+        // 4. Crear un nuevo producto
         [HttpPost]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status201Created)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ProductDto>> Post(ProductAddUpdateDto productDto)
         {
             var result = await _productService.CreateProductAsync(productDto);
+
             if (result.IsSuccess)
-                return CreatedAtAction(nameof(Get), new { id = result.Data.Id }, new ApiResponse<ProductDto>(201, "Product created successfully.", result.Data));
+                // Usamos CreatedAtAction para el 201 RESTful
+                return CreatedAtAction(nameof(Get), new { id = result.Data.Id },
+                                        new ApiResponse<ProductDto>(201, "Product created successfully.", result.Data));
 
-
-            return Conflict(new ApiResponse(409, result.ErrorMessage));
+            // Si falla, ToActionResult usará el 409 Conflict o el 500 del service.
+            return result.ToActionResult();
         }
 
-        // Actualizar un producto existente
+        // 5. Actualizar un producto existente
         [HttpPut("{id}")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
         [ProducesResponseType(StatusCodes.Status409Conflict)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ProductDto>> Put(int id, [FromBody] ProductAddUpdateDto productDto)
         {
             var result = await _productService.UpdateProductAsync(id, productDto);
 
             if (result.IsSuccess)
+                // Retorna 200 OK con el recurso actualizado en el cuerpo
                 return Ok(new ApiResponse<ProductDto>(200, "Product updated successfully.", result.Data));
 
-            // Dependiendo del mensaje de error, retorna 404 o 409
-            if (result.ErrorMessage.Contains("does not exist"))
-            {
-                return NotFound(new ApiResponse(404, result.ErrorMessage));
-            }
-            return Conflict(new ApiResponse(409, result.ErrorMessage));
+            // Si falla, ToActionResult usará el 404 Not Found, 409 Conflict o 500 del service.
+            return result.ToActionResult();
         }
 
-        // Eliminar un producto
+        // 6. Eliminar un producto
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
@@ -110,11 +101,13 @@ namespace API.Controllers
         public async Task<IActionResult> Delete(int id)
         {
             var result = await _productService.DeleteProductAsync(id);
+
             if (result.IsSuccess)
+                // Retorna 204 No Content para eliminación exitosa (sin cuerpo)
                 return NoContent();
 
-            return NotFound(new ApiResponse(404, result.ErrorMessage));     
+            // Si falla, ToActionResult usará el 404 Not Found (desde el service)
+            return result.ToActionResult();
         }
-
     }
 }

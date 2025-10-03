@@ -1,5 +1,4 @@
-﻿using API.Dtos.Products;
-using API.Dtos.Roles;
+﻿using API.Dtos.Roles;
 using API.Services.Interfaces;
 using AutoMapper;
 using Core.Entities;
@@ -29,21 +28,24 @@ public class RoleService : IRoleService
 
             if (roleExists != null)
             {
-                return ServiceResult<RoleDto>.Failure("The role with the same name already exists.");
+                // 409 Conflict: El recurso ya existe.
+                return ServiceResult<RoleDto>.Failure("The role with the same name already exists.", 409);
             }
 
             var role = _mapper.Map<Role>(roleDto);
             _unitOfWork.Roles.Add(role);
             await _unitOfWork.SaveAsync();
 
-            await _unitOfWork.Products.GetByIdAsync(role.Id);
+            // Corrección: Debe ser .Roles.GetByIdAsync
+            await _unitOfWork.Roles.GetByIdAsync(role.Id);
 
             var createdRoleDto = _mapper.Map<RoleDto>(role);
             return ServiceResult<RoleDto>.Success(createdRoleDto);
         }
         catch (Exception ex)
         {
-            return ServiceResult<RoleDto>.Failure($"An error occurred while creating the role: {ex.Message}");
+            // 500 Internal Server Error: Para errores inesperados.
+            return ServiceResult<RoleDto>.Failure($"An error occurred while creating the role: {ex.Message}", 500);
         }
     }
 
@@ -54,7 +56,8 @@ public class RoleService : IRoleService
             var role = await _unitOfWork.Roles.GetByIdAsync(id);
             if (role == null)
             {
-                return ServiceResult.Failure("The role requested does not exist.");
+                // 404 Not Found: El recurso a eliminar no existe.
+                return ServiceResult.Failure("The role requested does not exist.", 404);
             }
 
             _unitOfWork.Roles.Remove(role);
@@ -64,7 +67,8 @@ public class RoleService : IRoleService
         }
         catch (Exception ex)
         {
-            return ServiceResult.Failure($"An error occurred while deleting the role: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult.Failure($"An error occurred while deleting the role: {ex.Message}", 500);
         }
     }
 
@@ -73,8 +77,9 @@ public class RoleService : IRoleService
         try
         {
             var role = await _unitOfWork.Roles.GetByIdAsync(id);
-            if(role == null)
-                return ServiceResult<RoleDto>.Failure("The role requested does not exist.");
+            if (role == null)
+                // 404 Not Found
+                return ServiceResult<RoleDto>.Failure("The role requested does not exist.", 404);
 
             var roleDto = _mapper.Map<RoleDto>(role);
 
@@ -82,7 +87,8 @@ public class RoleService : IRoleService
         }
         catch (Exception ex)
         {
-            return ServiceResult<RoleDto>.Failure($"An unexpected error ocurred while retrieving the product: {ex.Message}");
+            // 500 Internal Server Error
+            return ServiceResult<RoleDto>.Failure($"An unexpected error ocurred while retrieving the role: {ex.Message}", 500);
         }
     }
 }

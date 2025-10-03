@@ -3,19 +3,11 @@ using API.Extensions;
 using API.Helpers.Errors;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Serilog;
 using Stripe;
-using System.Reflection;
+using Microsoft.OpenApi.Models; // Para OpenApiSecurityScheme, etc.
+using System.Reflection; // Necesario para la documentación XML
 
 var builder = WebApplication.CreateBuilder(args);
-
-var logger = new LoggerConfiguration()
-    .ReadFrom.Configuration(builder.Configuration)
-    .Enrich.FromLogContext()
-    .CreateLogger();
-
-//builder.Logging.ClearProviders(); // limpia los mensajes por defecto en desarrollo, para solo usar nuestro logger
-builder.Logging.AddSerilog(logger);
 
 //AutoMapper
 builder.Services.AddAutoMapper(Assembly.GetEntryAssembly());
@@ -31,7 +23,7 @@ StripeConfiguration.ApiKey = stripeOptions.SecretKey;
 //builder.Services.ConfigureRateLimiting();
 
 // Add services to the container.
-builder.Services.ConfigureCors();
+builder.Services.ConfigureCors(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.ConfigureApiVersioning();
 builder.Services.AddJwt(builder.Configuration);
@@ -47,6 +39,33 @@ builder.Services.AddControllers(options =>
 
 // extension para errores de validación
 builder.Services.AddValidationErrors();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    // 1. Configuración de seguridad JWT (ya la tenías, ahora con el método de Swashbuckle)
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please insert JWT with Bearer into field",
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
 
 builder.Services.AddDbContext<PosContext>(options =>
 {
@@ -69,7 +88,11 @@ app.UseStatusCodePagesWithReExecute("/errors/{0}");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Tu API v1");
+    });
 }
 
 // En el futuro configurar el seed (consultar curso)

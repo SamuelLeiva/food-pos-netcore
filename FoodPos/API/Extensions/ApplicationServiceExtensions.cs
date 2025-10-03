@@ -17,15 +17,38 @@ namespace API.Extensions;
 
 public static class ApplicationServiceExtensions
 {
-    public static void ConfigureCors(this IServiceCollection services) =>
+    public static void ConfigureCors(this IServiceCollection services, IConfiguration configuration)
+    {
+        // 1. Obtener la lista de orígenes permitidos desde la configuración
+        var allowedOrigins = configuration.GetSection("AllowedOrigins").Get<string[]>();
+
         services.AddCors(options =>
         {
             options.AddPolicy("CorsPolicy", builder =>
-                builder.AllowAnyOrigin()
-                .AllowAnyMethod()
-                .AllowAnyHeader());
-        });
+            {
+                if (allowedOrigins != null && allowedOrigins.Length > 0)
+                {
+                    // 2. Usar WithOrigins() para restringir los dominios
+                    builder.WithOrigins(allowedOrigins)
+                           // 3. Requerir credenciales (si usas cookies, tokens en cookies, o autenticación básica)
+                           .AllowCredentials()
 
+                           // 4. Especificar métodos y cabeceras
+                           .WithMethods("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS")
+                           .AllowAnyHeader();
+                }
+                else
+                {
+                    // Si la lista está vacía (por seguridad o fallback), 
+                    // puedes dejar un mensaje o usar una política más restrictiva.
+                    // Para desarrollo, podrías mantener AllowAnyOrigin temporalmente, pero no en Prod.
+                    builder.AllowAnyOrigin() // SOLO COMO ÚLTIMO RECURSO EN DESARROLLO
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                }
+            });
+        });
+    }
 
     public static void AddApplicationServices(this IServiceCollection services)
     {

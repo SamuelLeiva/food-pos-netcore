@@ -27,7 +27,7 @@ public class CategoryService : ICategoryService
             .FirstOrDefault();
 
             if (categoryExists != null)
-                return ServiceResult<CategoryDto>.Failure("A category with the same name already exists.");
+                return ServiceResult<CategoryDto>.Failure("A category with the same name already exists.", 409);
 
             var category = _mapper.Map<Category>(categoryDto);
             _unitOfWork.Categories.Add(category);
@@ -39,7 +39,7 @@ public class CategoryService : ICategoryService
         }
         catch (Exception ex)
         {
-            return ServiceResult<CategoryDto>.Failure($"An error occurred while creating the category: {ex.Message}");
+            return ServiceResult<CategoryDto>.Failure($"An error occurred while creating the category: {ex.Message}", 500);
         }
         
     }
@@ -50,7 +50,7 @@ public class CategoryService : ICategoryService
         {
             var category = await _unitOfWork.Categories.GetByIdAsync(id);
             if (category == null)
-                return ServiceResult.Failure("The category to delete does not exist.");
+                return ServiceResult.Failure("The category to delete does not exist.", 404);
 
             _unitOfWork.Categories.Remove(category);
             await _unitOfWork.SaveAsync();
@@ -59,7 +59,7 @@ public class CategoryService : ICategoryService
         }
         catch (Exception ex)
         {
-            return ServiceResult.Failure($"An error occurred while deleting the category: {ex.Message}");
+            return ServiceResult.Failure($"An error occurred while deleting the category: {ex.Message}", 500);
         }
         
     }
@@ -75,7 +75,7 @@ public class CategoryService : ICategoryService
         }
         catch (Exception ex)
         {
-            return ServiceResult<Pager<CategoryDto>>.Failure($"An error occurred while retrieving paginated categories: {ex.Message}");
+            return ServiceResult<Pager<CategoryDto>>.Failure($"An error occurred while retrieving paginated categories: {ex.Message}", 500);
         }
     }
 
@@ -89,7 +89,7 @@ public class CategoryService : ICategoryService
         }
         catch (Exception ex)
         {
-            return ServiceResult<List<CategoryDto>>.Failure($"An error occurred while retrieving all categories: {ex.Message}");
+            return ServiceResult<List<CategoryDto>>.Failure($"An error occurred while retrieving all categories: {ex.Message}", 500);
         }
     }
 
@@ -99,14 +99,14 @@ public class CategoryService : ICategoryService
         {
             var category = await _unitOfWork.Categories.GetByIdAsync(id);
             if (category == null)
-                return ServiceResult<CategoryDto>.Failure("The category requested does not exist.");
+                return ServiceResult<CategoryDto>.Failure("The category requested does not exist.", 404);
 
             var categoryDto = _mapper.Map<CategoryDto>(category);
             return ServiceResult<CategoryDto>.Success(categoryDto);
         }
         catch (Exception ex)
         {
-            return ServiceResult<CategoryDto>.Failure($"An error occurred while retrieving the category: {ex.Message}");
+            return ServiceResult<CategoryDto>.Failure($"An error occurred while retrieving the category: {ex.Message}", 500);
         }
     }
 
@@ -116,14 +116,14 @@ public class CategoryService : ICategoryService
         {
             var categoryDb = await _unitOfWork.Categories.GetByIdAsync(id);
             if (categoryDb == null)
-                return ServiceResult<CategoryDto>.Failure("The category requested does not exist.");
+                return ServiceResult<CategoryDto>.Failure("The category requested does not exist.", 404);
 
             var categoryExists = _unitOfWork.Categories
                 .Find(c => c.Name.ToLower() == categoryDto.Name.ToLower() && c.Id != id)
                 .FirstOrDefault();
 
             if (categoryExists != null)
-                return ServiceResult<CategoryDto>.Failure("A category with the same name already exists.");
+                return ServiceResult<CategoryDto>.Failure("A category with the same name already exists.", 409);
 
             _mapper.Map(categoryDto, categoryDb);
             categoryDb.UpdatedAt = DateTime.Now;
@@ -134,7 +134,7 @@ public class CategoryService : ICategoryService
         }
         catch (Exception ex)
         {
-            return ServiceResult<CategoryDto>.Failure($"An error occurred while updating the category: {ex.Message}");
+            return ServiceResult<CategoryDto>.Failure($"An error occurred while updating the category: {ex.Message}", 500);
         }
     }
 }

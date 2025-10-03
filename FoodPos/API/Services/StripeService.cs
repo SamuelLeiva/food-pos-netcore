@@ -15,6 +15,7 @@ public class StripeService : IStripeService
         _stripeOptions = stripeOptions.Value;
         StripeConfiguration.ApiKey = _stripeOptions.SecretKey;
     }
+
     public async Task<ServiceResult<string>> CreatePaymentIntentAsync(PaymentIntentDto paymentIntentDto)
     {
         try
@@ -41,11 +42,28 @@ public class StripeService : IStripeService
         }
         catch (StripeException ex)
         {
-            return ServiceResult<string>.Failure($"Stripe error: {ex.StripeError.Code} - {ex.Message}");
+            // La mayoría de los errores de Stripe son errores de la petición o de pago (Bad Request, Payment Required)
+            // Usamos un 400 Bad Request o 402 Payment Required si se conoce el error de pago específico, 
+            // pero 400 es seguro para la mayoría de los errores de la API de Stripe.
+
+            int statusCode = 400;
+
+            if (ex.StripeError != null)
+            {
+                // Si el error es una falla en el pago (ej. tarjeta rechazada)
+                if (ex.StripeError.Type == "card_error")
+                {
+                    // 402 Payment Required: Indica que el cliente debe pagar (la tarjeta falló, etc.)
+                    statusCode = 402;
+                }
+            }
+
+            return ServiceResult<string>.Failure($"Stripe error: {ex.StripeError.Code} - {ex.Message}", statusCode);
         }
         catch (Exception ex)
         {
-            return ServiceResult<string>.Failure($"An unexpected error occurred: {ex.Message}");
+            // 500 Internal Server Error: Para errores inesperados no relacionados directamente con la API de Stripe
+            return ServiceResult<string>.Failure($"An unexpected error occurred: {ex.Message}", 500);
         }
     }
 }
